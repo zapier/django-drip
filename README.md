@@ -3,7 +3,7 @@ Django Drip
 
 [![Build Status](https://secure.travis-ci.org/zapier/django-drip.png)](http://travis-ci.org/zapier/django-drip)
 
-Use admin powered `User` querysets to send drip campaign emails.
+Use the admin to manage drip campaign emails using querysets on Django's User model.
 
 [Read the docs at ReadTheDocs!](https://django-drip.readthedocs.org/en/latest/)
 

@@ -1,5 +1,5 @@
 import base64
-import simplejson
+import json
 
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -50,7 +50,7 @@ class DripAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, extra_context=None):
         from drip.utils import get_fields, get_simple_fields
         extra_context = extra_context or {}
-        extra_context['field_data'] = simplejson.dumps(get_simple_fields(User))
+        extra_context['field_data'] = json.dumps(get_simple_fields(User))
         return super(DripAdmin, self).change_view(request, object_id, extra_context=extra_context)
 
     def get_urls(self):
