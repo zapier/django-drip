@@ -1,0 +1,22 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static admin_modify %}
+{% load url from future %}
+{% load admin_urls %}
+
+{% block title %}Viewing Timeline for {{ drip.name }}{% endblock title %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+  <h1>{{ drip.name }} Schedule:</h1>
+
+  <div class="content-main">
+    <ul>{% for pack in shifted_drips %}
+      <li><strong>{% if pack.drip.now_shift_kwargs.days != 0 %}{{ pack.drip.now }}{% else %}today!{% endif %}</strong>{% if pack.qs %}
+        <ul>{% for user in pack.qs %}{% if user.email %}
+          <li>{{ user.email }} - {{ user.id }} - <a href="{% url 'admin:view_drip_email' drip_id into_past into_future user.id %}">view email</a></li>
+        {% endif %}{% endfor %}</ul>
+      {% endif %}</li>
+    {% endfor %}</ul>
+  </div>
+{% endblock content %}
