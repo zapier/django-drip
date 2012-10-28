@@ -34,7 +34,6 @@ Django Drip is a simple app for creating drip campaigns for email using Django's
         body = Template(body_template).render(Context({'user': user}))
 
         msg = EmailMessage(subject, body, 'me@example.com', [user.email])
-        msg.content_subtype = 'html'
         msg.send()
 
 However, instead of writing and modifying code each and everytime you want to add a new drip to the campaign or edit the copy, you can simply edit the records listed in the admin interface. Plus, Django Drip also handles deduplication, making sure the same user never gets an email for the same drip compaign twice. 

@@ -113,9 +113,13 @@ class DripBase(object):
         context = Context({'user': user})
         subject = Template(self.subject_template).render(context)
         body = Template(self.body_template).render(context)
+        plain = strip_tags(body)
 
-        email = EmailMultiAlternatives(subject, strip_tags(body), from_email, [user.email])
-        email.attach_alternative(self.body_template, 'text/html')
+        email = EmailMultiAlternatives(subject, plain, from_email, [user.email])
+
+        # check if there are html tags in the rendered template
+        if len(plain) != len(body):
+            email.attach_alternative(self.body_template, 'text/html')
 
         if send:
             sd = SentDrip.objects.create(
