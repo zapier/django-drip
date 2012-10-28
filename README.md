@@ -5,7 +5,7 @@ Django Drip
 
 Use the admin to manage drip campaign emails using querysets on Django's User model.
 
-[Read the docs at ReadTheDocs!](https://django-drip.readthedocs.org/en/latest/)
+[Read the docs](https://django-drip.readthedocs.org/en/latest/) or [check out a demo](http://djangodrip.com/).
 
 ### Installing:
 
