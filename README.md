@@ -3,10 +3,9 @@ Django Drip
 
 [![Build Status](https://secure.travis-ci.org/zapier/django-drip.png)](http://travis-ci.org/zapier/django-drip)
 
-Use admin powered User querysets to send drip campaign emails.
+Use admin powered `User` querysets to send drip campaign emails.
 
 [Read the docs at ReadTheDocs!](https://django-drip.readthedocs.org/en/latest/)
-
 
 ### Installing:
 
@@ -43,3 +42,7 @@ python manage.py syncdb
 # or...
 python manage.py migrate drip
 ```
+-------------------
+
+![what the admin looks like](https://raw.github.com/zapier/django-drip/master/docs/images/drip-example.png)
+![what the admin looks like for the timeline](https://raw.github.com/zapier/django-drip/master/docs/images/view-timeline.png)

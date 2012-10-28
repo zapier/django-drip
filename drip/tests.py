@@ -222,4 +222,3 @@ class DripsTestCase(TestCase):
         email = drip.build_email(user, send=True)
 
         self.assertIsInstance(email, EmailMultiAlternatives)
-
