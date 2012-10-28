@@ -98,7 +98,7 @@ class DripBase(object):
         target_user_ids = self.get_queryset().values_list('id', flat=True)
         exclude_user_ids = SentDrip.objects.filter(date__lt=datetime.now(),
                                                    drip=self.drip_model,
-                                                   user_id__in=target_user_ids)\
+                                                   user__id__in=target_user_ids)\
                                            .values_list('user_id', flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
