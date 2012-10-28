@@ -14,7 +14,7 @@ url = 'https://github.com/zapier/django-drip'
 author = 'Bryan Helmig'
 author_email = 'bryan@zapier.com'
 license = 'MIT'
-install_requires = ['Django']
+install_requires = ['Django', 'django-timedeltafield']
 
 
 def get_version(package):
