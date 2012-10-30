@@ -119,7 +119,7 @@ class DripBase(object):
 
         # check if there are html tags in the rendered template
         if len(plain) != len(body):
-            email.attach_alternative(self.body_template, 'text/html')
+            email.attach_alternative(body, 'text/html')
 
         if send:
             sd = SentDrip.objects.create(
