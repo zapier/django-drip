@@ -18,12 +18,13 @@ class DripBase(object):
     name = None
     subject_template = None
     body_template = None
+    from_ = None
 
     def __init__(self, drip_model, *args, **kwargs):
         self.drip_model = drip_model
 
         self.name = kwargs.pop('name', self.name)
-
+        self.from_ = kwargs.pop('from_', self.from_)
         self.subject_template = kwargs.pop('subject_template', self.subject_template)
         self.body_template = kwargs.pop('body_template', self.body_template)
 
@@ -108,7 +109,8 @@ class DripBase(object):
         """
         from django.utils.html import strip_tags
 
-        from_email = getattr(settings, 'DRIP_FROM_EMAIL', settings.EMAIL_HOST_USER)
+        from_email = self.from_ if not self.from_ \
+            else getattr(settings, 'DRIP_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
 
         context = Context({'user': user})
         subject = Template(self.subject_template).render(context)
@@ -125,6 +127,7 @@ class DripBase(object):
             sd = SentDrip.objects.create(
                 drip=self.drip_model,
                 user=user,
+                from_email = from_email,
                 subject=subject,
                 body=body
             )

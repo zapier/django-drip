@@ -20,6 +20,8 @@ class Drip(models.Model):
 
     enabled = models.BooleanField(default=False)
 
+    from_email = models.EmailField(null=True, blank=True,
+        help_text='Set a custom from email.')
     subject_template = models.TextField(null=True, blank=True)
     body_html_template = models.TextField(null=True, blank=True,
         help_text='You will have settings and user in the context.')
@@ -30,6 +32,7 @@ class Drip(models.Model):
 
         drip = DripBase(drip_model=self,
                         name=self.name,
+                        from_=self.from_email if self.from_email else None,
                         subject_template=self.subject_template if self.subject_template else None,
                         body_template=self.body_html_template if self.body_html_template else None)
         return drip
@@ -49,6 +52,9 @@ class SentDrip(models.Model):
 
     subject = models.TextField()
     body = models.TextField()
+    from_email = models.EmailField(
+        null=True, default=None # For south so that it can migrate existing rows.
+    )
 
 
 
