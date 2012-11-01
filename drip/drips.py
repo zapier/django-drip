@@ -111,11 +111,12 @@ class DripBase(object):
         """
         from django.utils.html import strip_tags
 
-        from_ = ''
         if not self.from_email:
             from_ = getattr(settings, 'DRIP_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
-        if self.from_email and self.from_email_name:
+        elif self.from_email_name:
             from_ = "%s <%s>" % (self.from_email_name, self.from_email)
+        else:
+            from_ = self.from_email
 
         context = Context({'user': user})
         subject = Template(self.subject_template).render(context)
