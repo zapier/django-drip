@@ -6,7 +6,7 @@ def get_fields(Model,
                parent_field="",
                model_stack=None,
                stack_limit=2,
-               excludes=['groups', 'permissions', 'comment', 'content_type']):
+               excludes=['permissions', 'comment', 'content_type']):
     """
     Given a Model, return a list of lists of strings with important stuff:
     ...
