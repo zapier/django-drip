@@ -18,6 +18,9 @@ class Drip(models.Model):
         verbose_name='Drip Name',
         help_text='A unique name for this drip.')
 
+    distinct = models.BooleanField(
+        default=True, help_text="If you want no more than one copy of each "
+        "user in the results, select this option.")
     enabled = models.BooleanField(default=False)
 
     subject_template = models.TextField(null=True, blank=True)
