@@ -2,15 +2,34 @@ from datetime import datetime, timedelta
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
 import timedelta as djangotimedelta
 
 
+class SenderBase(models.Model):
+    """ Inherit from this model to use a custom sender. """
+
+    name = models.CharField(max_length=64)
+    type = models.ForeignKey(ContentType, editable=False)
+
+    def save(self,force_insert=False,force_update=False):
+        if self.type_id is None:
+            self.type = ContentType.objects.get_for_model(self.__class__)
+        super(SenderBase, self).save(force_insert, force_update)
+
+    def get_instance(self):
+        return self.type.get_object_for_this_type(id=self.id)
+
+    def __unicode__(self):
+        return self.name
+
 class Drip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
+    sender = models.ForeignKey(SenderBase, null=True, blank=True, default=None)
 
     name = models.CharField(
         max_length=255,

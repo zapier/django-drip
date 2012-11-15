@@ -1,10 +1,12 @@
-from django.conf import settings
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import User
-from django.template import Context, Template
-from drip.models import SentDrip
 from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+from django.template import Context, Template
+
+from drip.models import SentDrip
 
 
 class DripBase(object):
@@ -102,35 +104,31 @@ class DripBase(object):
                                            .values_list('user_id', flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
-    def build_email(self, user, send=False):
+    def send_message(self, user, subject, body, plain):
         """
-        Creates Email instance and optionally sends to user.
+        Creates Email instance and sends to user.
         """
-        from django.utils.html import strip_tags
 
-        from_email = getattr(settings, 'DRIP_FROM_EMAIL', settings.EMAIL_HOST_USER)
+        from_email = getattr(
+            settings, 'DRIP_FROM_EMAIL', settings.EMAIL_HOST_USER)
 
+        email = EmailMultiAlternatives(
+            subject, plain, from_email, [user.email])
+
+        # check if there are html tags in the rendered template
+        if len(plain) is not len(body):
+            email.attach_alternative(body, 'text/html')
+
+        email.send()
+
+        return True
+
+    def build_message(self, user):
         context = Context({'user': user})
         subject = Template(self.subject_template).render(context)
         body = Template(self.body_template).render(context)
         plain = strip_tags(body)
-
-        email = EmailMultiAlternatives(subject, plain, from_email, [user.email])
-
-        # check if there are html tags in the rendered template
-        if len(plain) != len(body):
-            email.attach_alternative(body, 'text/html')
-
-        if send:
-            sd = SentDrip.objects.create(
-                drip=self.drip_model,
-                user=user,
-                subject=subject,
-                body=body
-            )
-            email.send()
-
-        return email
+        return subject, body, plain
 
     def send(self):
         """
@@ -138,13 +136,27 @@ class DripBase(object):
 
         Add that user to the SentDrip.
 
-        Returns a list of created SentDrips.
+        Returns the count of SentDrips.
         """
 
         count = 0
         for user in self.get_queryset():
-            msg = self.build_email(user, send=True)
-            count += 1
+            subject, body, plain = self.build_message(user)
+            sender = self.drip_model.sender
+            if sender:
+                result = sender.get_instance().send_message(
+                    user, subject, body, plain)
+            else:
+                result = self.send_message(user, subject, body, plain)
+
+            if result:
+                SentDrip.objects.create(
+                    drip=self.drip_model,
+                    user=user,
+                    subject=subject,
+                    body=body
+                )
+                count += 1
 
         return count
 

@@ -8,11 +8,20 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'SenderBase'
+        db.create_table('drip_senderbase', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=64)),
+            ('type', self.gf('django.db.models.fields.related.ForeignKey')(editable=False, to=orm['contenttypes.ContentType'])),
+        ))
+        db.send_create_signal('drip', ['SenderBase'])
+
         # Adding model 'Drip'
         db.create_table('drip_drip', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('lastchanged', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
+            ('sender', self.gf('django.db.models.fields.related.ForeignKey')(null=True, blank=True, default=None, to=orm['drip.SenderBase'])),
             ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
             ('enabled', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('subject_template', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
@@ -46,6 +55,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting model 'SenderBase'
+        db.delete_table('drip_senderbase')
+
         # Deleting model 'Drip'
         db.delete_table('drip_drip')
 
@@ -93,6 +105,12 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        'drip.senderbase': {
+            'Meta': {'object_name': 'SenderBase'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
+            'type': ('django.db.models.fields.related.ForeignKey', [], {'editable': 'False', 'to': "orm['contenttypes.ContentType']"}),
+        },
         'drip.drip': {
             'Meta': {'object_name': 'Drip'},
             'body_html_template': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
@@ -101,6 +119,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lastchanged': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            'sender': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'blank': 'True', 'null': 'True', 'to': "orm['drip.SenderBase']"}),
             'subject_template': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
         },
         'drip.querysetrule': {
