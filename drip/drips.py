@@ -79,7 +79,8 @@ class DripBase(object):
         try:
             return self._queryset
         except AttributeError:
-            self._queryset = self.apply_queryset_rules(self.queryset())
+            self._queryset = self.apply_queryset_rules(self.queryset())\
+                                 .distinct()
             return self._queryset
 
     def run(self):
