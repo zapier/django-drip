@@ -1,11 +1,14 @@
 from django.conf import settings
-from datetime import datetime
 
 from django.contrib.auth.models import User
-from django.utils import timezone
 from django.template import Context, Template
 from drip.models import SentDrip
 from django.core.mail import EmailMultiAlternatives
+
+try:
+    from django.utils.timezone import now as conditional_now
+except ImportError:
+    from datetime.datetime import now as conditional_now
 
 
 class DripBase(object):
@@ -43,8 +46,7 @@ class DripBase(object):
         This allows us to override what we consider "now", making it easy
         to build timelines of who gets what when.
         """
-        now = timezone.now() if settings.USE_TZ else datetime.now()
-        return now + self.timedelta(**self.now_shift_kwargs)
+        return conditional_now() + self.timedelta(**self.now_shift_kwargs)
 
     def timedelta(self, *a, **kw):
         """
@@ -98,8 +100,7 @@ class DripBase(object):
         Do an exclude for all Users who have a SentDrip already.
         """
         target_user_ids = self.get_queryset().values_list('id', flat=True)
-        now = timezone.now() if settings.USE_TZ else datetime.now()
-        exclude_user_ids = SentDrip.objects.filter(date__lt=now,
+        exclude_user_ids = SentDrip.objects.filter(date__lt=conditional_now(),
                                                    drip=self.drip_model,
                                                    user__id__in=target_user_ids)\
                                            .values_list('user_id', flat=True)
