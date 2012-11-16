@@ -124,7 +124,7 @@ class DripBase(object):
         email = EmailMultiAlternatives(subject, plain, from_, [user.email])
 
         # check if there are html tags in the rendered template
-        if len(plain) is not len(body):
+        if len(plain) != len(body):
             email.attach_alternative(body, 'text/html')
 
         email.send()
