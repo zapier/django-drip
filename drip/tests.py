@@ -2,11 +2,32 @@ from datetime import datetime, timedelta
 
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase
 from django.core.mail import EmailMultiAlternatives
 
+
+class RulesTestCase(TestCase):
+    def setUp(self):
+        self.drip = Drip.objects.create(
+            name='A Drip just for Rules',
+            subject_template='Hello',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+    def test_valid_rule(self):
+        rule = QuerySetRule(drip=self.drip, field_name='date_joined', lookup_type='lte', field_value='now-60 days')
+        rule.clean()
+
+    def test_bad_field_name(self):
+        rule = QuerySetRule(drip=self.drip, field_name='date__joined', lookup_type='lte', field_value='now-60 days')
+        self.assertRaises(ValidationError, rule.clean)
+
+    def test_bad_field_value(self):
+        rule = QuerySetRule(drip=self.drip, field_name='date_joined', lookup_type='lte', field_value='now-2 months')
+        self.assertRaises(ValidationError, rule.clean)
 
 class DripsTestCase(TestCase):
     def setUp(self):

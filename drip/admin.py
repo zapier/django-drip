@@ -44,11 +44,19 @@ class DripAdmin(admin.ModelAdmin):
 
         return HttpResponse(body)
 
-    def change_view(self, request, object_id, extra_context=None):
-        from drip.utils import get_fields, get_simple_fields
+    def build_extra_context(self, extra_context):
+        from drip.utils import get_simple_fields
         extra_context = extra_context or {}
         extra_context['field_data'] = json.dumps(get_simple_fields(User))
-        return super(DripAdmin, self).change_view(request, object_id, extra_context=extra_context)
+        return extra_context
+
+    def add_view(self, request, extra_context=None):
+        return super(DripAdmin, self).add_view(
+            request, extra_context=self.build_extra_context(extra_context))
+
+    def change_view(self, request, object_id, extra_context=None):
+        return super(DripAdmin, self).change_view(
+            request, object_id, extra_context=self.build_extra_context(extra_context))
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns, url

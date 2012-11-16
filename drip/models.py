@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
@@ -39,6 +40,10 @@ class Drip(models.Model):
 
     enabled = models.BooleanField(default=False)
 
+    from_email = models.EmailField(null=True, blank=True,
+        help_text='Set a custom from email.')
+    from_email_name = models.CharField(max_length=150, null=True, blank=True,
+        help_text="Set a name for a custom from email.")
     subject_template = models.TextField(null=True, blank=True)
     body_html_template = models.TextField(null=True, blank=True,
         help_text='You will have settings and user in the context.')
@@ -49,6 +54,8 @@ class Drip(models.Model):
 
         drip = DripBase(drip_model=self,
                         name=self.name,
+                        from_email=self.from_email if self.from_email else None,
+                        from_email_name=self.from_email_name if self.from_email_name else None,
                         subject_template=self.subject_template if self.subject_template else None,
                         body_template=self.body_html_template if self.body_html_template else None)
         return drip
@@ -68,6 +75,12 @@ class SentDrip(models.Model):
 
     subject = models.TextField()
     body = models.TextField()
+    from_email = models.EmailField(
+        null=True, default=None # For south so that it can migrate existing rows.
+    )
+    from_email_name = models.CharField(max_length=150,
+        null=True, default=None # For south so that it can migrate existing rows.
+    )
 
 
 
@@ -107,6 +120,13 @@ class QuerySetRule(models.Model):
     field_value = models.CharField(max_length=255,
         help_text=('Can be anything from a number, to a string. Or, do ' +
                    '`now-7 days` or `now+3 days` for fancy timedelta.'))
+
+    def clean(self):
+        try:
+            self.apply(User.objects.all())
+        except Exception as e:
+            raise ValidationError(
+                '%s raised trying to apply rule: %s' % (type(e).__name__, e))
 
     def apply(self, qs, now=datetime.now):
         field_name = '__'.join([self.field_name, self.lookup_type])
