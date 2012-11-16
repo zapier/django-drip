@@ -20,15 +20,16 @@ class DripBase(object):
     name = None
     subject_template = None
     body_template = None
-    from_email = None
-    from_email_name = None
+    from_address = None
+    from_address_name = None
 
     def __init__(self, drip_model, *args, **kwargs):
         self.drip_model = drip_model
 
         self.name = kwargs.pop('name', self.name)
-        self.from_email = kwargs.pop('from_email', self.from_email)
-        self.from_email_name = kwargs.pop('from_email_name', self.from_email_name)
+        self.from_address = kwargs.pop('from_address', self.from_address)
+        self.from_address_name = kwargs.pop('from_address_name',
+                                            self.from_address_name)
         self.subject_template = kwargs.pop('subject_template', self.subject_template)
         self.body_template = kwargs.pop('body_template', self.body_template)
 
