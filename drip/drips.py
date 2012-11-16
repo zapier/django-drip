@@ -113,12 +113,12 @@ class DripBase(object):
         Creates Email instance and sends to user.
         """
 
-        if not self.from_email:
+        if not self.from_address:
             from_ = getattr(settings, 'DRIP_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
-        elif self.from_email_name:
-            from_ = "%s <%s>" % (self.from_email_name, self.from_email)
+        elif self.from_address_name:
+            from_ = "%s <%s>" % (self.from_address_name, self.from_address)
         else:
-            from_ = self.from_email
+            from_ = self.from_address
 
         email = EmailMultiAlternatives(subject, plain, from_, [user.email])
 
@@ -152,7 +152,7 @@ class DripBase(object):
             sender = self.drip_model.sender
             if sender:
                 result = sender.get_instance().send_message(
-                    user, subject, body, plain)
+                    self, user, subject, body, plain)
             else:
                 result = self.send_message(user, subject, body, plain)
 

@@ -8,39 +8,39 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Drip.from_email'
-        db.add_column('drip_drip', 'from_email',
-                      self.gf('django.db.models.fields.EmailField')(max_length=75, null=True, blank=True),
+        # Adding field 'Drip.from_address'
+        db.add_column('drip_drip', 'from_address',
+                      self.gf('django.db.models.fields.CharField')(max_length=128, null=True, blank=True),
                       keep_default=False)
 
-        # Adding field 'Drip.from_email_name'
-        db.add_column('drip_drip', 'from_email_name',
+        # Adding field 'Drip.from_address_name'
+        db.add_column('drip_drip', 'from_address_name',
                       self.gf('django.db.models.fields.CharField')(max_length=150, null=True, blank=True),
                       keep_default=False)
 
-        # Adding field 'SentDrip.from_email'
-        db.add_column('drip_sentdrip', 'from_email',
-                      self.gf('django.db.models.fields.EmailField')(default=None, max_length=75, null=True),
+        # Adding field 'SentDrip.from_address'
+        db.add_column('drip_sentdrip', 'from_address',
+                      self.gf('django.db.models.fields.CharField')(default=None, max_length=128, null=True),
                       keep_default=False)
 
-        # Adding field 'SentDrip.from_email_name'
-        db.add_column('drip_sentdrip', 'from_email_name',
+        # Adding field 'SentDrip.from_address_name'
+        db.add_column('drip_sentdrip', 'from_address_name',
                       self.gf('django.db.models.fields.CharField')(default=None, max_length=150, null=True),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'Drip.from_email'
-        db.delete_column('drip_drip', 'from_email')
+        # Deleting field 'Drip.from_address'
+        db.delete_column('drip_drip', 'from_address')
 
-        # Deleting field 'Drip.from_email_name'
-        db.delete_column('drip_drip', 'from_email_name')
+        # Deleting field 'Drip.from_address_name'
+        db.delete_column('drip_drip', 'from_address_name')
 
-        # Deleting field 'SentDrip.from_email'
-        db.delete_column('drip_sentdrip', 'from_email')
+        # Deleting field 'SentDrip.from_address'
+        db.delete_column('drip_sentdrip', 'from_address')
 
-        # Deleting field 'SentDrip.from_email_name'
-        db.delete_column('drip_sentdrip', 'from_email_name')
+        # Deleting field 'SentDrip.from_address_name'
+        db.delete_column('drip_sentdrip', 'from_address_name')
 
 
     models = {
@@ -85,8 +85,8 @@ class Migration(SchemaMigration):
             'body_html_template': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'enabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'from_email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'null': 'True', 'blank': 'True'}),
-            'from_email_name': ('django.db.models.fields.CharField', [], {'max_length': '150', 'null': 'True', 'blank': 'True'}),
+            'from_address': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'}),
+            'from_address_name': ('django.db.models.fields.CharField', [], {'max_length': '150', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lastchanged': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
@@ -108,8 +108,8 @@ class Migration(SchemaMigration):
             'body': ('django.db.models.fields.TextField', [], {}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'drip': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'sent_drips'", 'to': "orm['drip.Drip']"}),
-            'from_email': ('django.db.models.fields.EmailField', [], {'default': 'None', 'max_length': '75', 'null': 'True'}),
-            'from_email_name': ('django.db.models.fields.CharField', [], {'default': 'None', 'max_length': '150', 'null': 'True'}),
+            'from_address': ('django.db.models.fields.CharField', [], {'default': 'None', 'max_length': '128', 'null': 'True'}),
+            'from_address_name': ('django.db.models.fields.CharField', [], {'default': 'None', 'max_length': '150', 'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'subject': ('django.db.models.fields.TextField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'sent_drips'", 'to': "orm['auth.User']"})

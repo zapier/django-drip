@@ -53,7 +53,9 @@ you can create a custom sender class that inherits from `SenderBase`. For exampl
 from drip.models import SenderBase
 
 class CustomSender(SenderBase):
-    def send_message(self, user, subject, body, plain):
+    # drip is the drip.drips.DripBase object which gives access to
+    # from_address and from_address_name
+    def send_message(self, drip, user, subject, body, plain):
         # Custom sending logic (SMS, in app messaging, snail mail, etc.)
         ...
         # Return a boolean indicating if the message was sent or not
