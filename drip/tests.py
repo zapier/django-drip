@@ -135,7 +135,7 @@ class DripsTestCase(TestCase):
 
     def test_custom_drip(self):
         """
-        Test a simple 
+        Test a simple
         """
         model_drip = self.build_joined_date_drip()
         drip = model_drip.drip
@@ -230,7 +230,7 @@ class DripsTestCase(TestCase):
         for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
             self.assertEquals(count, shifted_drip.get_queryset().count())
 
-    def test_build_email(self):
+    def test_build_message(self):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
@@ -240,6 +240,6 @@ class DripsTestCase(TestCase):
         #: grabs base drip instance
         drip = model_drip.drip
         user = User.objects.get(id=1)
-        email = drip.build_email(user, send=True)
+        subject, body, plain = drip.build_message(user)
 
-        self.assertIsInstance(email, EmailMultiAlternatives)
+        self.assertNotEqual(body, plain)

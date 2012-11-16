@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
 # just using this to parse, but totally insane package naming...
@@ -9,9 +10,27 @@ from django.core.exceptions import ValidationError
 import timedelta as djangotimedelta
 
 
+class SenderBase(models.Model):
+    """ Inherit from this model to use a custom sender. """
+
+    name = models.CharField(max_length=64)
+    type = models.ForeignKey(ContentType, editable=False)
+
+    def save(self,force_insert=False,force_update=False):
+        if self.type_id is None:
+            self.type = ContentType.objects.get_for_model(self.__class__)
+        super(SenderBase, self).save(force_insert, force_update)
+
+    def get_instance(self):
+        return self.type.get_object_for_this_type(id=self.id)
+
+    def __unicode__(self):
+        return self.name
+
 class Drip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
+    sender = models.ForeignKey(SenderBase, null=True, blank=True, default=None)
 
     name = models.CharField(
         max_length=255,
@@ -21,10 +40,10 @@ class Drip(models.Model):
 
     enabled = models.BooleanField(default=False)
 
-    from_email = models.EmailField(null=True, blank=True,
-        help_text='Set a custom from email.')
-    from_email_name = models.CharField(max_length=150, null=True, blank=True,
-        help_text="Set a name for a custom from email.")
+    from_address = models.CharField(null=True, blank=True, max_length=128,
+        help_text='Set a custom from address (email, phone number, etc.')
+    from_address_name = models.CharField(max_length=150, null=True, blank=True,
+        help_text="Set a name for a custom from address.")
     subject_template = models.TextField(null=True, blank=True)
     body_html_template = models.TextField(null=True, blank=True,
         help_text='You will have settings and user in the context.')
@@ -35,8 +54,8 @@ class Drip(models.Model):
 
         drip = DripBase(drip_model=self,
                         name=self.name,
-                        from_email=self.from_email if self.from_email else None,
-                        from_email_name=self.from_email_name if self.from_email_name else None,
+                        from_address=self.from_address if self.from_address else None,
+                        from_address_name=self.from_address_name if self.from_address_name else None,
                         subject_template=self.subject_template if self.subject_template else None,
                         body_template=self.body_html_template if self.body_html_template else None)
         return drip
@@ -56,10 +75,11 @@ class SentDrip(models.Model):
 
     subject = models.TextField()
     body = models.TextField()
-    from_email = models.EmailField(
+    from_address = models.CharField(
+        max_length=128,
         null=True, default=None # For south so that it can migrate existing rows.
     )
-    from_email_name = models.CharField(max_length=150,
+    from_address_name = models.CharField(max_length=150,
         null=True, default=None # For south so that it can migrate existing rows.
     )
 

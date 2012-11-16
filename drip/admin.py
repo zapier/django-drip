@@ -11,7 +11,7 @@ class QuerySetRuleInline(admin.TabularInline):
     model = QuerySetRule
 
 class DripAdmin(admin.ModelAdmin):
-    list_display = ('name', 'enabled')
+    list_display = ('name', 'enabled', 'sender')
     inlines = [
         QuerySetRuleInline,
     ]
@@ -19,7 +19,7 @@ class DripAdmin(admin.ModelAdmin):
     av = lambda self, view: self.admin_site.admin_view(view)
     def timeline(self, request, drip_id, into_past, into_future):
         """
-        Return a list of people who should get emails.
+        Return a list of people who should get messages.
         """
         from django.shortcuts import render, get_object_or_404
 
@@ -34,18 +34,15 @@ class DripAdmin(admin.ModelAdmin):
 
         return render(request, 'drip/timeline.html', locals())
 
-    def view_drip_email(self, request, drip_id, into_past, into_future, user_id):
+    def view_drip(self, request, drip_id, into_past, into_future, user_id):
         from django.shortcuts import render, get_object_or_404
         from django.http import HttpResponse
         drip = get_object_or_404(Drip, id=drip_id)
         user = get_object_or_404(User, id=user_id)
 
-        html = ''
-        for body, mime in drip.drip.build_email(user).alternatives:
-            if mime == 'text/html':
-                html = body
+        subject, body, plain = drip.drip.build_message(user)
 
-        return HttpResponse(html)
+        return HttpResponse(body)
 
     def build_extra_context(self, extra_context):
         from drip.utils import get_simple_fields
@@ -72,8 +69,8 @@ class DripAdmin(admin.ModelAdmin):
             ),
             url(
                 r'^(?P<drip_id>[\d]+)/timeline/(?P<into_past>[\d]+)/(?P<into_future>[\d]+)/(?P<user_id>[\d]+)/$',
-                self.av(self.view_drip_email),
-                name='view_drip_email'
+                self.av(self.view_drip),
+                name='view_drip'
             )
         )
         return my_urls + urls
