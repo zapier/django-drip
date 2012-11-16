@@ -231,10 +231,12 @@ class DripsTestCase(TestCase):
             self.assertEquals(count, shifted_drip.get_queryset().count())
 
     def test_build_email(self):
+        body_html_template = '<h2>This</h2> is an <b>example</b> html <strong>body</strong> for {{ user.username }}.'
+        subject_template = 'HELLO {{ user.username }}'
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
-            subject_template='HELLO {{ user.username }}',
-            body_html_template='<h2>This</h2> is an <b>example</b> html <strong>body</strong>.'
+            subject_template=subject_template,
+            body_html_template=body_html_template
         )
 
         #: grabs base drip instance
@@ -243,3 +245,12 @@ class DripsTestCase(TestCase):
         email = drip.build_email(user, send=True)
 
         self.assertIsInstance(email, EmailMultiAlternatives)
+        expected_result_body = body_html_template.replace("{{ user.username }}", user.username)
+        expected_result_subject = subject_template.replace("{{ user.username }}", user.username)
+        from django.core import mail
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, expected_result_subject)
+        # It's rather ugly to retrieve the HTML version from the email (below)
+        html_body = mail.outbox[0].message().get_payload()[-1].get_payload()    # Basically, get the first captured message, get it's message object, grab the payload of the envelope which returns [text/plain, text/html] attachments (so grab index -1) and then call get_payload on that message to get the body
+        self.assertEqual(html_body, expected_result_body)        
+
