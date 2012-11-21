@@ -28,6 +28,7 @@ class Drip(models.Model):
     subject_template = models.TextField(null=True, blank=True)
     body_html_template = models.TextField(null=True, blank=True,
         help_text='You will have settings and user in the context.')
+    message_class = models.CharField(max_length=120, blank=True, default='default')
 
     @property
     def drip(self):

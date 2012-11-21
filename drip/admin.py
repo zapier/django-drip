@@ -1,20 +1,32 @@
 import base64
 import json
 
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 
 from drip.models import Drip, SentDrip, QuerySetRule
+from drip.drips import configured_message_classes
 
 
 class QuerySetRuleInline(admin.TabularInline):
     model = QuerySetRule
 
+
+class DripForm(forms.ModelForm):
+    message_class = forms.ChoiceField(
+        choices=((v, '%s (%s)' % (k, v)) for k, v in configured_message_classes().items())
+    )
+    class Meta:
+        model = Drip
+
+
 class DripAdmin(admin.ModelAdmin):
-    list_display = ('name', 'enabled')
+    list_display = ('name', 'enabled', 'message_class')
     inlines = [
         QuerySetRuleInline,
     ]
+    form = DripForm
 
     av = lambda self, view: self.admin_site.admin_view(view)
     def timeline(self, request, drip_id, into_past, into_future):
