@@ -15,7 +15,7 @@ class QuerySetRuleInline(admin.TabularInline):
 
 class DripForm(forms.ModelForm):
     message_class = forms.ChoiceField(
-        choices=((v, '%s (%s)' % (k, v)) for k, v in configured_message_classes().items())
+        choices=((k, '%s (%s)' % (k, v)) for k, v in configured_message_classes().items())
     )
     class Meta:
         model = Drip
