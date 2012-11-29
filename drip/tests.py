@@ -3,10 +3,11 @@ from datetime import datetime, timedelta
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core import mail
+from django.conf import settings
 
 from drip.models import Drip, SentDrip, QuerySetRule
-from drip.drips import DripBase
-from django.core.mail import EmailMultiAlternatives
+from drip.drips import DripBase, DripMessage
 
 
 class RulesTestCase(TestCase):
@@ -28,6 +29,7 @@ class RulesTestCase(TestCase):
     def test_bad_field_value(self):
         rule = QuerySetRule(drip=self.drip, field_name='date_joined', lookup_type='lte', field_value='now-2 months')
         self.assertRaises(ValidationError, rule.clean)
+
 
 class DripsTestCase(TestCase):
     def setUp(self):
@@ -230,16 +232,71 @@ class DripsTestCase(TestCase):
         for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
             self.assertEquals(count, shifted_drip.get_queryset().count())
 
-    def test_build_email(self):
-        model_drip = Drip.objects.create(
+
+# Used by CustomMessagesTest
+class PlainDripEmail(DripMessage):
+    @property
+    def message(self):
+        if not self._message:
+            email = mail.EmailMessage(self.subject, self.plain, self.from_email, [self.user.email])
+            self._message = email
+        return self._message
+
+
+class CustomMessagesTest(TestCase):
+    def setUp(self):
+        self.old_msg_classes = getattr(settings, 'DRIP_MESSAGE_CLASSES', None)
+        self.user = User.objects.create(username='customuser', email='custom@example.com')
+        self.model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
             body_html_template='<h2>This</h2> is an <b>example</b> html <strong>body</strong>.'
         )
+        QuerySetRule.objects.create(
+            drip=self.model_drip,
+            field_name='id',
+            lookup_type='exact',
+            field_value=self.user.id,
+        )
 
-        #: grabs base drip instance
-        drip = model_drip.drip
-        user = User.objects.get(id=1)
-        email = drip.build_email(user, send=True)
+    def tearDown(self):
+        if self.old_msg_classes is None:
+            if hasattr(settings, 'DRIP_MESSAGE_CLASSES'):
+                del settings.DRIP_MESSAGE_CLASSES
+        else:
+            settings.DRIP_MESSAGE_CLASSES = self.old_msg_classes
 
-        self.assertIsInstance(email, EmailMultiAlternatives)
+    def test_default_email(self):
+        result = self.model_drip.drip.send()
+        self.assertEquals(1, result)
+        self.assertEquals(1, len(mail.outbox))
+        email = mail.outbox.pop()
+        self.assertIsInstance(email, mail.EmailMultiAlternatives)
+
+    def test_custom_added_not_used(self):
+        settings.DRIP_MESSAGE_CLASSES = {'plain': 'drip.tests.PlainDripEmail'}
+        result = self.model_drip.drip.send()
+        self.assertEquals(1, result)
+        self.assertEquals(1, len(mail.outbox))
+        email = mail.outbox.pop()
+        # Since we did not specify custom class, default should be used.
+        self.assertIsInstance(email, mail.EmailMultiAlternatives)
+
+    def test_custom_added_and_used(self):
+        settings.DRIP_MESSAGE_CLASSES = {'plain': 'drip.tests.PlainDripEmail'}
+        self.model_drip.message_class = 'plain'
+        self.model_drip.save()
+        result = self.model_drip.drip.send()
+        self.assertEquals(1, result)
+        self.assertEquals(1, len(mail.outbox))
+        email = mail.outbox.pop()
+        # In this case we did specify the custom key, so message should be of custom type.
+        self.assertIsInstance(email, mail.EmailMessage)
+
+    def test_override_default(self):
+        settings.DRIP_MESSAGE_CLASSES = {'default': 'drip.tests.PlainDripEmail'}
+        result = self.model_drip.drip.send()
+        self.assertEquals(1, result)
+        self.assertEquals(1, len(mail.outbox))
+        email = mail.outbox.pop()
+        self.assertIsInstance(email, mail.EmailMessage)
