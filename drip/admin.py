@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 
 from drip.models import Drip, SentDrip, QuerySetRule
-from drip.drips import configured_message_classes
+from drip.drips import configured_message_classes, message_class_for
 
 
 class QuerySetRuleInline(admin.TabularInline):
@@ -51,9 +51,10 @@ class DripAdmin(admin.ModelAdmin):
         from django.http import HttpResponse
         drip = get_object_or_404(Drip, id=drip_id)
         user = get_object_or_404(User, id=user_id)
+        drip_message = message_class_for(drip.message_class)(drip.drip, user)
 
         html = ''
-        for body, mime in drip.drip.build_email(user).alternatives:
+        for body, mime in drip_message.message.alternatives:
             if mime == 'text/html':
                 html = body
 
