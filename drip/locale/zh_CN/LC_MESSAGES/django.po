@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 14:08+0800\n"
+"POT-Creation-Date: 2013-01-03 14:32+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Lisheng Guan <guanlisheng@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,9 +18,61 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0\n"
 
+#: models.py:72
+msgid "Filter"
+msgstr ""
+
+#: models.py:73
+msgid "Exclude"
+msgstr ""
+
+#: models.py:77
+msgid "exactly"
+msgstr "精准的"
+
+#: models.py:78
+msgid "exactly (case insensitive)"
+msgstr ""
+
+#: models.py:79
+msgid "contains"
+msgstr "包括"
+
+#: models.py:80 models.py:82
+msgid "contains (case insensitive)"
+msgstr ""
+
+#: models.py:81
+msgid "regex"
+msgstr ""
+
+#: models.py:83
+msgid "greater than"
+msgstr "大于"
+
+#: models.py:84
+msgid "greater than or equal to"
+msgstr "大于或等于"
+
+#: models.py:85
+msgid "lesser than"
+msgstr "小于"
+
+#: models.py:86
+msgid "lesser than or equal to"
+msgstr "小于或等于"
+
+#: models.py:87 models.py:88
+msgid "starts with"
+msgstr ""
+
+#: models.py:89 models.py:90
+msgid "ends with (case insensitive)"
+msgstr ""
+
 #: templates/admin/drip/change_form.html:8
 msgid "History"
-msgstr ""
+msgstr "查看历史"
 
 #: templates/admin/drip/change_form.html:9
 msgid "View on site"

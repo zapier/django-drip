@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext as _
+
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
@@ -67,25 +69,25 @@ class SentDrip(models.Model):
 
 
 METHOD_TYPES = (
-    ('filter', 'Filter'),
-    ('exclude', 'Exclude'),
+    ('filter', _('Filter')),
+    ('exclude', _('Exclude')),
 )
 
 LOOKUP_TYPES = (
-    ('exact', 'exactly'),
-    ('iexact', 'exactly (case insensitive)'),
-    ('contains', 'contains'),
-    ('icontains', 'contains (case insensitive)'),
-    ('regex', 'regex'),
-    ('iregex', 'contains (case insensitive)'),
-    ('gt', 'greater than'),
-    ('gte', 'greater than or equal to'),
-    ('lt', 'lesser than'),
-    ('lte', 'lesser than or equal to'),
-    ('startswith', 'starts with'),
-    ('endswith', 'starts with'),
-    ('istartswith', 'ends with (case insensitive)'),
-    ('iendswith', 'ends with (case insensitive)'),
+    ('exact', _('exactly')),
+    ('iexact', _('exactly (case insensitive)')),
+    ('contains', _('contains')),
+    ('icontains', _('contains (case insensitive)')),
+    ('regex', _('regex')),
+    ('iregex', _('contains (case insensitive)')),
+    ('gt', _('greater than')),
+    ('gte', _('greater than or equal to')),
+    ('lt', _('lesser than')),
+    ('lte', _('lesser than or equal to')),
+    ('startswith', _('starts with')),
+    ('endswith', _('starts with')),
+    ('istartswith', _('ends with (case insensitive)')),
+    ('iendswith', _('ends with (case insensitive)')),
 )
 
 class QuerySetRule(models.Model):
