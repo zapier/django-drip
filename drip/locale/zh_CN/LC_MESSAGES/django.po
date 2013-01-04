@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Lisheng Guan <guanlisheng@gmail.com>, 2012,2013.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-01-03 14:32+0800\n"
+"POT-Creation-Date: 2013-01-04 11:09+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Lisheng Guan <guanlisheng@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,33 +18,53 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0\n"
 
+#: models.py:21
+msgid "Drip Name"
+msgstr "邮件名称"
+
+#: models.py:22
+msgid "A unique name for this drip."
+msgstr "独一无二的名称"
+
+#: models.py:27
+msgid "Set a custom from email."
+msgstr "设置一个电子邮箱"
+
+#: models.py:29
+msgid "Set a name for a custom from email."
+msgstr "设置发件人姓名"
+
+#: models.py:32
+msgid "You will have settings and user in the context."
+msgstr "可以使用设置和用户信息"
+
 #: models.py:72
 msgid "Filter"
-msgstr ""
+msgstr "过滤"
 
 #: models.py:73
 msgid "Exclude"
-msgstr ""
+msgstr "排除"
 
 #: models.py:77
 msgid "exactly"
-msgstr "精准的"
+msgstr "精准匹配"
 
 #: models.py:78
 msgid "exactly (case insensitive)"
-msgstr ""
+msgstr "精准匹配（忽略大小写）"
 
 #: models.py:79
 msgid "contains"
-msgstr "包括"
+msgstr "包含"
 
 #: models.py:80 models.py:82
 msgid "contains (case insensitive)"
-msgstr ""
+msgstr "包含（忽略大小写）"
 
 #: models.py:81
 msgid "regex"
-msgstr ""
+msgstr "正则匹配"
 
 #: models.py:83
 msgid "greater than"
@@ -64,11 +84,11 @@ msgstr "小于或等于"
 
 #: models.py:87 models.py:88
 msgid "starts with"
-msgstr ""
+msgstr "以，，，开始"
 
 #: models.py:89 models.py:90
 msgid "ends with (case insensitive)"
-msgstr ""
+msgstr "以，，，结尾"
 
 #: templates/admin/drip/change_form.html:8
 msgid "History"
