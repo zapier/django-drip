@@ -16,8 +16,8 @@ INSTALLED_APPS = (
     'drip',
 
     # testing only
-    'mock',
+    'credits',
 )
 
-AUTH_PROFILE_MODULE = 'mock.Profile'
+AUTH_PROFILE_MODULE = 'credits.Profile'
 
