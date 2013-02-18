@@ -98,7 +98,6 @@ class QuerySetRule(models.Model):
     field_name = models.CharField(max_length=128, verbose_name='Field name off User')
     lookup_type = models.CharField(max_length=12, default='exact', choices=LOOKUP_TYPES)
 
-    # would be nice if we could do a Count() object or something
     field_value = models.CharField(max_length=255,
         help_text=('Can be anything from a number, to a string. Or, do ' +
                    '`now-7 days` or `now+3 days` for fancy timedelta.'))
@@ -111,7 +110,14 @@ class QuerySetRule(models.Model):
                 '%s raised trying to apply rule: %s' % (type(e).__name__, e))
 
     def apply(self, qs, now=datetime.now):
-        field_name = '__'.join([self.field_name, self.lookup_type])
+        # Support Count() as m2m__count
+        field_name = self.field_name
+        if field_name.endswith('__count'):
+            agg, _, _ = self.field_name.rpartition('__')
+            field_name = 'num_%s' % agg
+            qs = qs.annotate(**{field_name: models.Count(agg)})
+
+        field_name = '__'.join([field_name, self.lookup_type])
         field_value = self.field_value
 
         # set time deltas and dates
