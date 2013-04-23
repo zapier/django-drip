@@ -100,7 +100,7 @@ class QuerySetRule(models.Model):
 
     field_value = models.CharField(max_length=255,
         help_text=('Can be anything from a number, to a string. Or, do ' +
-                   '`now-7 days` or `now+3 days` for fancy timedelta.'))
+                   '`now-7 days` or `today+3 days` for fancy timedelta.'))
 
     def clean(self):
         try:
@@ -123,12 +123,16 @@ class QuerySetRule(models.Model):
         # set time deltas and dates
         if field_value.startswith('now-'):
             field_value = self.field_value.replace('now-', '')
-            delta = djangotimedelta.parse(field_value)
-            field_value = now() - delta
+            field_value = now() - djangotimedelta.parse(field_value)
         elif field_value.startswith('now+'):
             field_value = self.field_value.replace('now+', '')
-            delta = djangotimedelta.parse(field_value)
-            field_value = now() + delta
+            field_value = now() + djangotimedelta.parse(field_value)
+        elif field_value.startswith('today-'):
+            field_value = self.field_value.replace('today-', '')
+            field_value = now().date() - djangotimedelta.parse(field_value)
+        elif field_value.startswith('today+'):
+            field_value = self.field_value.replace('today+', '')
+            field_value = now().date() + djangotimedelta.parse(field_value)
 
         # set booleans
         if field_value == 'True':
