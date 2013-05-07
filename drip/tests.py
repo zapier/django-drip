@@ -253,9 +253,8 @@ class DripsTestCase(TestCase):
             lookup_type='gte',
             field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
         )
-        drip = model_drip.drip
 
-
+        # then get it's admin view.
         rf = RequestFactory()
         timeline_url = reverse('admin:drip_timeline', kwargs={
                                     'drip_id': model_drip.id,
@@ -268,6 +267,8 @@ class DripsTestCase(TestCase):
         match = resolve(timeline_url)
 
         response = match.func(request, *match.args, **match.kwargs)
+
+        # check that our admin (not excluded from test) is shown once.
         self.assertEqual(response.content.count(admin.email), 1)
 
 
