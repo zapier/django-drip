@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import resolve, reverse
 from django.core import mail
 from django.conf import settings
 
@@ -231,6 +233,42 @@ class DripsTestCase(TestCase):
         # catches "today and yesterday" users
         for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
             self.assertEquals(count, shifted_drip.get_queryset().count())
+
+    def test_admin_timeline_prunes_user_output(self):
+        """multiple users in timeline is confusing."""
+        admin = User.objects.create(username='admin', email='admin@example.com')
+        admin.is_staff=True
+        admin.is_superuser=True
+        admin.save()
+
+        # create a drip campaign that will surely give us duplicates.
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='date_joined',
+            lookup_type='gte',
+            field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+        )
+        drip = model_drip.drip
+
+
+        rf = RequestFactory()
+        timeline_url = reverse('admin:drip_timeline', kwargs={
+                                    'drip_id': model_drip.id,
+                                    'into_past': 3,
+                                    'into_future': 3})
+
+        request = rf.get(timeline_url)
+        request.user = admin
+
+        match = resolve(timeline_url)
+
+        response = match.func(request, *match.args, **match.kwargs)
+        self.assertEqual(response.content.count(admin.email), 1)
 
 
 # Used by CustomMessagesTest
