@@ -52,13 +52,18 @@ class DripAdmin(admin.ModelAdmin):
         drip = get_object_or_404(Drip, id=drip_id)
         user = get_object_or_404(User, id=user_id)
         drip_message = message_class_for(drip.message_class)(drip.drip, user)
-
         html = ''
-        for body, mime in drip_message.message.alternatives:
-            if mime == 'text/html':
-                html = body
+        mime = ''
+        if drip_message.message.alternatives:
+            for body, mime in drip_message.message.alternatives:
+                if mime == 'text/html':
+                    html = body
+                    mime = 'text/html'
+        else:
+            html = drip_message.message.body
+            mime = 'text/plain'
 
-        return HttpResponse(html)
+        return HttpResponse(html, content_type=mime)
 
     def build_extra_context(self, extra_context):
         from drip.utils import get_simple_fields
