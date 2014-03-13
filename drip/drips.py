@@ -165,10 +165,15 @@ class DripBase(object):
                 prefix = 'aggregate_'
             kwargs = rule_kwargs.get(prefix + rule.method_type, rule_kwargs['filter'])
             kwargs.update(rule.filter_kwargs(qs, now=self.now))
-            qs = rule.apply_any_annotation(qs)
 
         qs = qs.exclude(**rule_kwargs['exclude'])
         qs = qs.filter(**rule_kwargs['filter'])
+
+        # apply aggregations.
+        for rule in self.drip_model.queryset_rules.all():
+            qs = rule.apply_any_annotation(qs)
+
+        # filter aggregations.
         qs = qs.exclude(**rule_kwargs['aggregate_exclude'])
         qs = qs.filter(**rule_kwargs['aggregate_filter'])
 
