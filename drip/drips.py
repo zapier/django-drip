@@ -155,14 +155,14 @@ class DripBase(object):
         First collect all filter/exclude kwargs and apply any annotations.
         Then apply all filters at once, and all excludes at once.
         """
-        rule_kwargs = {}
+        rule_kwargs = {'filter': {}, 'exclude': {}}
         for queryset_rule in self.drip_model.queryset_rules.all():
 
-            kwargs = rule_kwargs.setdefault(queryset_rule.method_type, {})
+            kwargs = rule_kwargs.get(queryset_rule.method_type, rule_kwargs['filter'])
             kwargs.update(queryset_rule.filter_kwargs(qs, now=self.now))
 
-        qs = qs.filter(**rule_kwargs.get('filter', {}))
-        qs = qs.exclude(**rule_kwargs.get('exclude', {}))
+        qs = qs.filter(**rule_kwargs['filter'])
+        qs = qs.exclude(**rule_kwargs['exclude'])
 
         return qs
 
