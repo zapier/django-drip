@@ -154,16 +154,23 @@ class DripBase(object):
         """
         First collect all filter/exclude kwargs and apply any annotations.
         Then apply all filters at once, and all excludes at once.
+
+        Finally apply filter and exclude aggregates at the end as a performance optimisation.
         """
-        rule_kwargs = {'filter': {}, 'exclude': {}}
-        for queryset_rule in self.drip_model.queryset_rules.all():
+        rule_kwargs = {'filter': {}, 'exclude': {}, 'aggregate_filter': {}, 'aggregate_exclude': {}}
+        for rule in self.drip_model.queryset_rules.all():
 
-            kwargs = rule_kwargs.get(queryset_rule.method_type, rule_kwargs['filter'])
-            kwargs.update(queryset_rule.filter_kwargs(qs, now=self.now))
-            qs = queryset_rule.apply_any_annotation(qs)
+            prefix = ''
+            if rule.field_name.endswith('__count'):
+                prefix = 'aggregate_'
+            kwargs = rule_kwargs.get(prefix + rule.method_type, rule_kwargs['filter'])
+            kwargs.update(rule.filter_kwargs(qs, now=self.now))
+            qs = rule.apply_any_annotation(qs)
 
-        qs = qs.filter(**rule_kwargs['filter'])
         qs = qs.exclude(**rule_kwargs['exclude'])
+        qs = qs.filter(**rule_kwargs['filter'])
+        qs = qs.exclude(**rule_kwargs['aggregate_exclude'])
+        qs = qs.filter(**rule_kwargs['aggregate_filter'])
 
         return qs
 
