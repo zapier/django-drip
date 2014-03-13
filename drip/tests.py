@@ -231,7 +231,7 @@ class DripsTestCase(TestCase):
         drip = model_drip.drip
 
         # catches "today and yesterday" users
-        for count, shifted_drip in zip([2, 2, 2, 2, 2], drip.walk(into_past=3, into_future=3)):
+        for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
             self.assertEquals(count, shifted_drip.get_queryset().count())
 
     def test_admin_timeline_prunes_user_output(self):
@@ -270,6 +270,35 @@ class DripsTestCase(TestCase):
 
         # check that our admin (not excluded from test) is shown once.
         self.assertEqual(response.content.count(admin.email), 1)
+
+
+    ##################
+    ### TEST M2M   ###
+    ##################
+
+    def test_annotated_field_name_property_no_count(self):
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='group_set__count',
+            lookup_type='eq',
+            field_value=2
+        )
+
+        self.assertEqual(qsr.annotated_field_name, 'num_group_set')
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='date_joined',
+            lookup_type='eq',
+            field_value=2
+        )
+
+        self.assertEqual(qsr.annotated_field_name, 'date_joined')
 
 
 # Used by CustomMessagesTest
