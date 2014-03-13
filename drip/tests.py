@@ -282,14 +282,39 @@ class DripsTestCase(TestCase):
             subject_template='HELLO {{ user.username }}',
             body_html_template='KETTEHS ROCK!'
         )
+
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
-            field_name='group_set__count',
+            field_name='date_joined',
+            lookup_type='eq',
+            field_value=2
+        )
+        self.assertEqual(qsr.annotated_field_name, 'date_joined')
+
+    def test_annotated_field_name_property_with_count(self):
+
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='groups__count',
             lookup_type='eq',
             field_value=2
         )
 
-        self.assertEqual(qsr.annotated_field_name, 'num_group_set')
+        self.assertEqual(qsr.annotated_field_name, 'num_groups')
+
+    def test_apply_annotations_no_count(self):
+
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
 
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
@@ -298,7 +323,30 @@ class DripsTestCase(TestCase):
             field_value=2
         )
 
-        self.assertEqual(qsr.annotated_field_name, 'date_joined')
+        qs = qsr.apply_any_annotation(None)
+
+        self.assertEqual(qs, None)
+
+    def test_apply_annotations_with_count(self):
+
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='groups__count',
+            lookup_type='eq',
+            field_value=2
+        )
+
+        qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
+
+        self.assertEqual(qs.query._aggregate_select().keys(), ['num_groups'])
+
+
 
 
 # Used by CustomMessagesTest

@@ -121,6 +121,7 @@ class QuerySetRule(models.Model):
     def apply_any_annotation(self, qs):
         if self.field_name.endswith('__count'):
             field_name = self.annotated_field_name
+            agg, _, _ = self.field_name.rpartition('__')
             qs = qs.annotate(**{field_name: models.Count(agg)})
         return qs
 
