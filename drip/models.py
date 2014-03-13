@@ -109,14 +109,24 @@ class QuerySetRule(models.Model):
             raise ValidationError(
                 '%s raised trying to apply rule: %s' % (type(e).__name__, e))
 
-    def filter_kwargs(self, qs, now=datetime.now):
-        # Support Count() as m2m__count
+    @property
+    def annotated_field_name(self):
         field_name = self.field_name
         if field_name.endswith('__count'):
-            agg, _, _ = self.field_name.rpartition('__')
+            agg, _, _ = field_name.rpartition('__')
             field_name = 'num_%s' % agg
-            qs = qs.annotate(**{field_name: models.Count(agg)})
 
+        return field_name
+
+    def apply_any_annotation(self, qs):
+        if self.field_name.endswith('__count'):
+            field_name = self.annotated_field_name
+            qs = qs.annotate(**{field_name: models.Count(agg)})
+        return qs
+
+    def filter_kwargs(self, qs, now=datetime.now):
+        # Support Count() as m2m__count
+        field_name = self.annotated_field_name
         field_name = '__'.join([field_name, self.lookup_type])
         field_value = self.field_value
 

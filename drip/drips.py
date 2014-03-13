@@ -160,6 +160,7 @@ class DripBase(object):
 
             kwargs = rule_kwargs.get(queryset_rule.method_type, rule_kwargs['filter'])
             kwargs.update(queryset_rule.filter_kwargs(qs, now=self.now))
+            qs = queryset_rule.apply_any_annotation(qs)
 
         qs = qs.filter(**rule_kwargs['filter'])
         qs = qs.exclude(**rule_kwargs['exclude'])
