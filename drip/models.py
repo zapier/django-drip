@@ -109,7 +109,7 @@ class QuerySetRule(models.Model):
             raise ValidationError(
                 '%s raised trying to apply rule: %s' % (type(e).__name__, e))
 
-    def apply(self, qs, now=datetime.now):
+    def filter_kwargs(self, qs, now=datetime.now):
         # Support Count() as m2m__count
         field_name = self.field_name
         if field_name.endswith('__count'):
@@ -142,6 +142,11 @@ class QuerySetRule(models.Model):
 
         kwargs = {field_name: field_value}
 
+        return kwargs
+
+    def apply(self, qs, now=datetime.now):
+
+        kwargs = self.filter_kwargs(qs, now)
         if self.method_type == 'filter':
             return qs.filter(**kwargs)
         elif self.method_type == 'exclude':
