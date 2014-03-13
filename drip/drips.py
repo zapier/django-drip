@@ -1,3 +1,5 @@
+from itertools import groupby
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.template import Context, Template
@@ -149,8 +151,20 @@ class DripBase(object):
         return walked_range
 
     def apply_queryset_rules(self, qs):
-        for queryset_rule in self.drip_model.queryset_rules.all():
-            qs = queryset_rule.apply(qs, now=self.now)
+        """
+        First collect all filter/exclude kwargs and apply any annotations.
+        Then apply all filters at once, and all excludes at once.
+        """
+        rule_kwargs = {}
+        rules = self.drip_model.queryset_rules.order_by('method_type').all()
+        for queryset_rule in rules:
+
+            kwargs = rule_kwargs.setdefault(queryset_rule.method_type, {})
+            kwargs.update(queryset_rule.filter_kwargs(qs, now=self.now))
+
+        qs = qs.filter(**rule_kwargs.get('filter', {}))
+        qs = qs.exclude(**rule_kwargs.get('exclude', {}))
+
         return qs
 
     ##################
