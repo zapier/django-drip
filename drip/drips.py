@@ -156,8 +156,7 @@ class DripBase(object):
         Then apply all filters at once, and all excludes at once.
         """
         rule_kwargs = {}
-        rules = self.drip_model.queryset_rules.order_by('method_type').all()
-        for queryset_rule in rules:
+        for queryset_rule in self.drip_model.queryset_rules.all():
 
             kwargs = rule_kwargs.setdefault(queryset_rule.method_type, {})
             kwargs.update(queryset_rule.filter_kwargs(qs, now=self.now))
