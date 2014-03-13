@@ -346,7 +346,31 @@ class DripsTestCase(TestCase):
 
         self.assertEqual(qs.query._aggregate_select().keys(), ['num_profile_user_groups'])
 
+    def test_apply_multiple_rules_with_aggregation(self):
 
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__user__groups__count',
+            lookup_type='eq',
+            field_value=0
+        )
+
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='date_joined',
+            lookup_type='gte',
+            field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+        )
+
+        qs = model_drip.drip.apply_queryset_rules(model_drip.drip.get_queryset())
+
+        self.assertEqual(qs.count(), 4)
 
 
 # Used by CustomMessagesTest

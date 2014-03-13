@@ -158,6 +158,8 @@ class QuerySetRule(models.Model):
     def apply(self, qs, now=datetime.now):
 
         kwargs = self.filter_kwargs(qs, now)
+        self.apply_any_annotation(qs)
+
         if self.method_type == 'filter':
             return qs.filter(**kwargs)
         elif self.method_type == 'exclude':
