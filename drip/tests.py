@@ -354,11 +354,11 @@ class DripsTestCase(TestCase):
             body_html_template='KETTEHS ROCK!'
         )
 
-        QuerySetRule.objects.create(
+        qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__user__groups__count',
             lookup_type='eq',
-            field_value=0
+            field_value='0'
         )
 
         QuerySetRule.objects.create(
@@ -368,6 +368,8 @@ class DripsTestCase(TestCase):
             field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
         )
 
+
+        qsr.clean()
         qs = model_drip.drip.apply_queryset_rules(model_drip.drip.get_queryset())
 
         self.assertEqual(qs.count(), 4)
