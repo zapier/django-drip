@@ -231,7 +231,7 @@ class DripsTestCase(TestCase):
         drip = model_drip.drip
 
         # catches "today and yesterday" users
-        for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
+        for count, shifted_drip in zip([2, 2, 2, 2, 2], drip.walk(into_past=3, into_future=3)):
             self.assertEquals(count, shifted_drip.get_queryset().count())
 
     def test_admin_timeline_prunes_user_output(self):
