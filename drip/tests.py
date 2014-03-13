@@ -301,12 +301,12 @@ class DripsTestCase(TestCase):
 
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
-            field_name='groups__count',
+            field_name='userprofile__user__groups__count',
             lookup_type='eq',
             field_value=2
         )
 
-        self.assertEqual(qsr.annotated_field_name, 'num_groups')
+        self.assertEqual(qsr.annotated_field_name, 'num_userprofile_user_groups')
 
     def test_apply_annotations_no_count(self):
 
@@ -337,14 +337,14 @@ class DripsTestCase(TestCase):
 
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
-            field_name='groups__count',
+            field_name='profile__user__groups__count',
             lookup_type='eq',
             field_value=2
         )
 
         qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
 
-        self.assertEqual(qs.query._aggregate_select().keys(), ['num_groups'])
+        self.assertEqual(qs.query._aggregate_select().keys(), ['num_profile_user_groups'])
 
 
 
