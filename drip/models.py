@@ -122,7 +122,7 @@ class QuerySetRule(models.Model):
         if self.field_name.endswith('__count'):
             field_name = self.annotated_field_name
             agg, _, _ = self.field_name.rpartition('__')
-            qs = qs.annotate(**{field_name: models.Count(agg)})
+            qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
         return qs
 
     def filter_kwargs(self, qs, now=datetime.now):
