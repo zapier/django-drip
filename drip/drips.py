@@ -172,9 +172,8 @@ class DripBase(object):
             qs = rule.apply_any_annotation(qs)
 
         if clauses['exclude']:
-            qs = qs.exclude(*clauses['exclude'])
-        if clauses['filter']:
-            qs = qs.filter(*clauses['filter'])
+            qs = qs.exclude(reduce(operator.or_, clauses['exclude']))
+        qs = qs.filter(*clauses['filter'])
 
         return qs
 

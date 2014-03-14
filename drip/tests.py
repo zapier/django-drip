@@ -203,6 +203,35 @@ class DripsTestCase(TestCase):
         for count, shifted_drip in zip([0, 1, 1, 1, 1], drip.walk(into_past=3, into_future=2)):
             self.assertEquals(count, shifted_drip.get_queryset().count())
 
+    def test_exclude_and_include(self):
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__credits',
+            lookup_type='gte',
+            field_value='1'
+        )
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__credits',
+            method_type='exclude',
+            lookup_type='exact',
+            field_value=100
+        )
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__credits',
+            method_type='exclude',
+            lookup_type='exact',
+            field_value=125
+        )
+        self.assertEqual(7, model_drip.drip.get_queryset().count()) # 7 people meet the criteria
+
     def test_custom_drip_static_datetime(self):
         model_drip = self.build_joined_date_drip()
         QuerySetRule.objects.create(
@@ -286,7 +315,7 @@ class DripsTestCase(TestCase):
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
-            lookup_type='eq',
+            lookup_type='exact',
             field_value=2
         )
         self.assertEqual(qsr.annotated_field_name, 'date_joined')
@@ -302,7 +331,7 @@ class DripsTestCase(TestCase):
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='userprofile__user__groups__count',
-            lookup_type='eq',
+            lookup_type='exact',
             field_value=2
         )
 
@@ -319,7 +348,7 @@ class DripsTestCase(TestCase):
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
-            lookup_type='eq',
+            lookup_type='exact',
             field_value=2
         )
 
@@ -338,7 +367,7 @@ class DripsTestCase(TestCase):
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__user__groups__count',
-            lookup_type='eq',
+            lookup_type='exact',
             field_value=2
         )
 
@@ -357,7 +386,7 @@ class DripsTestCase(TestCase):
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__user__groups__count',
-            lookup_type='eq',
+            lookup_type='exact',
             field_value='0'
         )
 
