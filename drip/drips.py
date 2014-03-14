@@ -1,11 +1,14 @@
 from itertools import groupby
+import operator
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models
 from django.template import Context, Template
 from django.utils.importlib import import_module
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+
 
 from drip.models import SentDrip
 
@@ -154,28 +157,24 @@ class DripBase(object):
         """
         First collect all filter/exclude kwargs and apply any annotations.
         Then apply all filters at once, and all excludes at once.
-
-        Finally apply filter and exclude aggregates at the end as a performance optimisation.
         """
-        rule_kwargs = {'filter': {}, 'exclude': {}, 'aggregate_filter': {}, 'aggregate_exclude': {}}
+        clauses = {
+            'filter': [],
+            'exclude': []}
+
         for rule in self.drip_model.queryset_rules.all():
 
-            prefix = ''
-            if rule.field_name.endswith('__count'):
-                prefix = 'aggregate_'
-            kwargs = rule_kwargs.get(prefix + rule.method_type, rule_kwargs['filter'])
-            kwargs.update(rule.filter_kwargs(qs, now=self.now))
+            clause = clauses.get(rule.method_type, clauses['filter'])
 
-        qs = qs.exclude(**rule_kwargs['exclude'])
-        qs = qs.filter(**rule_kwargs['filter'])
+            kwargs = rule.filter_kwargs(qs, now=self.now)
+            clause.append(models.Q(**kwargs))
 
-        # apply aggregations.
-        for rule in self.drip_model.queryset_rules.all():
             qs = rule.apply_any_annotation(qs)
 
-        # filter aggregations.
-        qs = qs.exclude(**rule_kwargs['aggregate_exclude'])
-        qs = qs.filter(**rule_kwargs['aggregate_filter'])
+        if clauses['exclude']:
+            qs = qs.exclude(*clauses['exclude'])
+        if clauses['filter']:
+            qs = qs.filter(*clauses['filter'])
 
         return qs
 
