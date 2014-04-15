@@ -2,6 +2,8 @@
 # MUST SPECIFY TO MAKE USE OF DJANGO DRIP
 DRIP_FROM_EMAIL = ''
 
+SECRET_KEY="whatever"
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
