@@ -44,6 +44,13 @@ class DripAdmin(admin.ModelAdmin):
                 'qs': shifted_drip.get_queryset()
             })
 
+        # if we have similar quesrysets on the first day and today, we only show today's one.
+        for index, shifted_drip in enumerate(shifted_drips):
+            if shifted_drip['drip'].now_shift_kwargs['days'] == 0 and index > 0:
+                if list(shifted_drips[0]['qs']) == list(shifted_drip['qs']):
+                    shifted_drips = []
+                    shifted_drips.append(shifted_drip)
+
         return render(request, 'drip/timeline.html', locals())
 
     def view_drip_email(self, request, drip_id, into_past, into_future, user_id):
