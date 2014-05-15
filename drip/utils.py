@@ -1,3 +1,6 @@
+import six
+
+from django.db import models
 from django.db.models import ForeignKey, OneToOneField, ManyToManyField
 from django.db.models.related import RelatedObject
 
@@ -20,6 +23,11 @@ def get_fields(Model,
 
     if model_stack is None:
         model_stack = []
+
+    # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
+    if isinstance(Model, six.string_types):
+        app_label, model_name = Model.split('.')
+        Model = models.get_model(app_label, model_name)
 
     fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_all_related_objects()
     model_stack.append(Model)
