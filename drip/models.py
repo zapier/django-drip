@@ -103,7 +103,7 @@ class QuerySetRule(models.Model):
     drip = models.ForeignKey(Drip, related_name='queryset_rules')
 
     method_type = models.CharField(max_length=12, default='filter', choices=METHOD_TYPES)
-    field_name = models.CharField(max_length=128, verbose_name='Field name off User')
+    field_name = models.CharField(max_length=128, verbose_name='Field name of User')
     lookup_type = models.CharField(max_length=12, default='exact', choices=LOOKUP_TYPES)
 
     field_value = models.CharField(max_length=255,
