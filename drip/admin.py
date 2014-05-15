@@ -3,7 +3,12 @@ import json
 
 from django import forms
 from django.contrib import admin
-from django.contrib.auth.models import User
+
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import configured_message_classes, message_class_for
@@ -75,7 +80,7 @@ class DripAdmin(admin.ModelAdmin):
             request, object_id, extra_context=self.build_extra_context(extra_context))
 
     def get_urls(self):
-        from django.conf.urls.defaults import patterns, url
+        from django.conf.urls import patterns, url
         urls = super(DripAdmin, self).get_urls()
         my_urls = patterns('',
             url(
