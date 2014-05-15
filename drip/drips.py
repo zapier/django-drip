@@ -1,9 +1,9 @@
 from django.conf import settings
 
 try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
+    from django.conf import settings
+    User = settings.AUTH_USER_MODEL
+except AttributeError:
     from django.contrib.auth.models import User
 
 from django.template import Context, Template

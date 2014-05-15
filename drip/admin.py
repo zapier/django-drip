@@ -5,9 +5,9 @@ from django import forms
 from django.contrib import admin
 
 try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
+    from django.conf import settings
+    User = settings.AUTH_USER_MODEL
+except AttributeError:
     from django.contrib.auth.models import User
 
 from drip.models import Drip, SentDrip, QuerySetRule
