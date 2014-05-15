@@ -1,4 +1,7 @@
+import six
+
 from django.conf import settings
+from django.db import models
 
 try:
     from django.conf import settings
@@ -237,4 +240,11 @@ class DripBase(object):
         Alternatively, you could create Drips on the fly
         using a queryset builder from the admin interface...
         """
+
+        # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
+        if isinstance(User, six.string_types):
+            app_label, model_name = User.split('.')
+            UserModel = models.get_model(app_label, model_name)  
+            return UserModel.objects      
+
         return User.objects

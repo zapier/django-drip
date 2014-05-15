@@ -1,3 +1,5 @@
+import six
+
 from datetime import datetime, timedelta
 
 from django.db import models
@@ -109,8 +111,14 @@ class QuerySetRule(models.Model):
                    '`now-7 days` or `now+3 days` for fancy timedelta.'))
 
     def clean(self):
+
+        # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
+        if isinstance(User, six.string_types):
+            app_label, model_name = User.split('.')
+            UserModel = models.get_model(app_label, model_name)  
+
         try:
-            self.apply(User.objects.all())
+            self.apply(UserModel.objects.all())
         except Exception as e:
             raise ValidationError(
                 '%s raised trying to apply rule: %s' % (type(e).__name__, e))

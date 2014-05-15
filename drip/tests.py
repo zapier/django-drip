@@ -14,6 +14,7 @@ from django.conf import settings
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase, DripMessage
+from credits.models import Profile
 
 
 class RulesTestCase(TestCase):
@@ -50,7 +51,7 @@ class DripsTestCase(TestCase):
             user = User.objects.create(username='%s_25_credits_a_day' % name, email='%s@test.com' % name)
             User.objects.filter(id=user.id).update(date_joined=start - timedelta(days=i))
 
-            profile = user.get_profile()
+            profile = Profile.objects.get(user=user)
             profile.credits = i * 25
             profile.save()
 

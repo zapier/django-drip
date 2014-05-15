@@ -21,5 +21,3 @@ INSTALLED_APPS = (
     'credits',
 )
 
-AUTH_PROFILE_MODULE = 'credits.Profile'
-
