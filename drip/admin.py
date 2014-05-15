@@ -55,7 +55,12 @@ class DripAdmin(admin.ModelAdmin):
         from django.shortcuts import render, get_object_or_404
         from django.http import HttpResponse
         drip = get_object_or_404(Drip, id=drip_id)
-        user = get_object_or_404(User, id=user_id)
+
+        if isinstance(User, six.string_types):
+            app_label, model_name = User.split('.')
+            UserModel = models.get_model(app_label, model_name)
+
+        user = get_object_or_404(UserModel, id=user_id)
         drip_message = message_class_for(drip.message_class)(drip.drip, user)
 
         html = ''
