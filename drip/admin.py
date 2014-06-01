@@ -1,6 +1,7 @@
 import base64
 import json
 
+import django
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
@@ -75,7 +76,11 @@ class DripAdmin(admin.ModelAdmin):
             request, object_id, extra_context=self.build_extra_context(extra_context))
 
     def get_urls(self):
-        from django.conf.urls.defaults import patterns, url
+        if django.VERSION[1] <= 5 and django.VERSION[0] <= 1:
+            from django.conf.urls.defaults import patterns, url
+        else:
+            from django.conf.urls import patterns, url
+
         urls = super(DripAdmin, self).get_urls()
         my_urls = patterns('',
             url(
