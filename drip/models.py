@@ -88,8 +88,8 @@ LOOKUP_TYPES = (
     ('iregex', 'contains (case insensitive)'),
     ('gt', 'greater than'),
     ('gte', 'greater than or equal to'),
-    ('lt', 'lesser than'),
-    ('lte', 'lesser than or equal to'),
+    ('lt', 'less than'),
+    ('lte', 'less than or equal to'),
     ('startswith', 'starts with'),
     ('endswith', 'starts with'),
     ('istartswith', 'ends with (case insensitive)'),
@@ -115,7 +115,7 @@ class QuerySetRule(models.Model):
         # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
         if isinstance(User, six.string_types):
             app_label, model_name = User.split('.')
-            UserModel = models.get_model(app_label, model_name)  
+            UserModel = models.get_model(app_label, model_name)
 
         try:
             self.apply(UserModel.objects.all())
