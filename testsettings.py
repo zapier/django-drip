@@ -1,5 +1,6 @@
 # MUST SPECIFY TO MAKE USE OF DJANGO DRIP
 DRIP_FROM_EMAIL = ''
+DEBUG = True
 
 SECRET_KEY = 'whatever/you/want-goes-here'
 
