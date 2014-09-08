@@ -66,12 +66,10 @@ class DripAdmin(admin.ModelAdmin):
             UserModel = models.get_model(app_label, model_name)
 
         user = get_object_or_404(UserModel, id=user_id)
-        print(user)
         drip_message = message_class_for(drip.message_class)(drip.drip, user)
 
-        html = ''
+        html = drip_message.message.body
         for body, mime in drip_message.message.alternatives:
-            print(mime)
             if mime == 'text/html':
                 html = body
 
