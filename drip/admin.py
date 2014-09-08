@@ -44,6 +44,7 @@ class DripAdmin(admin.ModelAdmin):
         from django.shortcuts import render, get_object_or_404
 
         drip = get_object_or_404(Drip, id=drip_id)
+        drip.prune()
 
         shifted_drips = []
         seen_users = set()
