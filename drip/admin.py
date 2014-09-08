@@ -71,6 +71,7 @@ class DripAdmin(admin.ModelAdmin):
 
         html = ''
         for body, mime in drip_message.message.alternatives:
+            print(mime)
             if mime == 'text/html':
                 html = body
 
