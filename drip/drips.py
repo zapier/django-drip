@@ -1,9 +1,15 @@
-from itertools import groupby
 import operator
+import six
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
+
+try:
+    from django.conf import settings
+    User = settings.AUTH_USER_MODEL
+except AttributeError:
+    from django.contrib.auth.models import User
+
 from django.template import Context, Template
 from django.utils.importlib import import_module
 from django.core.mail import EmailMultiAlternatives
@@ -255,4 +261,11 @@ class DripBase(object):
         Alternatively, you could create Drips on the fly
         using a queryset builder from the admin interface...
         """
+
+        # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
+        if isinstance(User, six.string_types):
+            app_label, model_name = User.split('.')
+            UserModel = models.get_model(app_label, model_name)
+            return UserModel.objects
+
         return User.objects

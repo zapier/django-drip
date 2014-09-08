@@ -1,7 +1,15 @@
+import six
+
 from datetime import datetime, timedelta
 
 from django.db import models
-from django.contrib.auth.models import User
+
+try:
+    from django.conf import settings
+    User = settings.AUTH_USER_MODEL
+except AttributeError:
+    from django.contrib.auth.models import User
+
 from django.core.exceptions import ValidationError
 
 # just using this to parse, but totally insane package naming...
@@ -53,7 +61,7 @@ class SentDrip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     drip = models.ForeignKey('drip.Drip', related_name='sent_drips')
-    user = models.ForeignKey('auth.User', related_name='sent_drips')
+    user = models.ForeignKey(User, related_name='sent_drips')
 
     subject = models.TextField()
     body = models.TextField()
@@ -95,7 +103,7 @@ class QuerySetRule(models.Model):
     drip = models.ForeignKey(Drip, related_name='queryset_rules')
 
     method_type = models.CharField(max_length=12, default='filter', choices=METHOD_TYPES)
-    field_name = models.CharField(max_length=128, verbose_name='Field name off User')
+    field_name = models.CharField(max_length=128, verbose_name='Field name of User')
     lookup_type = models.CharField(max_length=12, default='exact', choices=LOOKUP_TYPES)
 
     field_value = models.CharField(max_length=255,
@@ -103,8 +111,14 @@ class QuerySetRule(models.Model):
                    '`now-7 days` or `today+3 days` for fancy timedelta.'))
 
     def clean(self):
+
+        # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
+        if isinstance(User, six.string_types):
+            app_label, model_name = User.split('.')
+            UserModel = models.get_model(app_label, model_name)  
+
         try:
-            self.apply(User.objects.all())
+            self.apply(UserModel.objects.all())
         except Exception as e:
             raise ValidationError(
                 '%s raised trying to apply rule: %s' % (type(e).__name__, e))

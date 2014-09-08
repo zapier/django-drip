@@ -48,13 +48,13 @@
       };
     }
 
-    $("ul.field-name-selector li").live("click", function() {
+    $(document).on("click", "ul.field-name-selector li", function() {
       // clicking a pill clears all pills and places the value in
       $(this).parent().parent().find("input").val($(this).attr('data-field'));
       $(this).parent().remove();
     });
 
-    $("div.tabular td.field-field_name input").live("focusin click keyup", function() {
+    $(document).on("focusin click keyup", "div.tabular td.field-field_name input", function() {
       pull_field_name(this);
     });
 

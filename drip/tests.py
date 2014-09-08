@@ -2,7 +2,13 @@ from datetime import datetime, timedelta
 
 from django.test import TestCase
 from django.test.client import RequestFactory
-from django.contrib.auth.models import User
+
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
+
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import resolve, reverse
 from django.core import mail
@@ -10,6 +16,7 @@ from django.conf import settings
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase, DripMessage
+from credits.models import Profile
 
 
 class RulesTestCase(TestCase):
@@ -46,7 +53,7 @@ class DripsTestCase(TestCase):
             user = User.objects.create(username='%s_25_credits_a_day' % name, email='%s@test.com' % name)
             User.objects.filter(id=user.id).update(date_joined=start - timedelta(days=i))
 
-            profile = user.get_profile()
+            profile = Profile.objects.get(user=user)
             profile.credits = i * 25
             profile.save()
 
@@ -139,7 +146,7 @@ class DripsTestCase(TestCase):
 
     def test_custom_drip(self):
         """
-        Test a simple 
+        Test a simple
         """
         model_drip = self.build_joined_date_drip()
         drip = model_drip.drip
