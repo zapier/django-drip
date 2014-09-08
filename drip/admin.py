@@ -44,11 +44,11 @@ class DripAdmin(admin.ModelAdmin):
         from django.shortcuts import render, get_object_or_404
 
         drip = get_object_or_404(Drip, id=drip_id)
+        drip.drip.prune()
 
         shifted_drips = []
         seen_users = set()
         for shifted_drip in drip.drip.walk(into_past=int(into_past), into_future=int(into_future)+1):
-            shifted_drip.prune()
             shifted_drips.append({
                 'drip': shifted_drip,
                 'qs': shifted_drip.get_queryset().exclude(id__in=seen_users)
