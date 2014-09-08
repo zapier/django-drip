@@ -1,9 +1,14 @@
+from itertools import groupby
+import operator
+
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models
 from django.template import Context, Template
 from django.utils.importlib import import_module
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+
 
 from drip.models import SentDrip
 
@@ -149,8 +154,27 @@ class DripBase(object):
         return walked_range
 
     def apply_queryset_rules(self, qs):
-        for queryset_rule in self.drip_model.queryset_rules.all():
-            qs = queryset_rule.apply(qs, now=self.now)
+        """
+        First collect all filter/exclude kwargs and apply any annotations.
+        Then apply all filters at once, and all excludes at once.
+        """
+        clauses = {
+            'filter': [],
+            'exclude': []}
+
+        for rule in self.drip_model.queryset_rules.all():
+
+            clause = clauses.get(rule.method_type, clauses['filter'])
+
+            kwargs = rule.filter_kwargs(qs, now=self.now)
+            clause.append(models.Q(**kwargs))
+
+            qs = rule.apply_any_annotation(qs)
+
+        if clauses['exclude']:
+            qs = qs.exclude(reduce(operator.or_, clauses['exclude']))
+        qs = qs.filter(*clauses['filter'])
+
         return qs
 
     ##################

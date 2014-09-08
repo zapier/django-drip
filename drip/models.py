@@ -100,7 +100,7 @@ class QuerySetRule(models.Model):
 
     field_value = models.CharField(max_length=255,
         help_text=('Can be anything from a number, to a string. Or, do ' +
-                   '`now-7 days` or `now+3 days` for fancy timedelta.'))
+                   '`now-7 days` or `today+3 days` for fancy timedelta.'))
 
     def clean(self):
         try:
@@ -109,26 +109,41 @@ class QuerySetRule(models.Model):
             raise ValidationError(
                 '%s raised trying to apply rule: %s' % (type(e).__name__, e))
 
-    def apply(self, qs, now=datetime.now):
-        # Support Count() as m2m__count
+    @property
+    def annotated_field_name(self):
         field_name = self.field_name
         if field_name.endswith('__count'):
-            agg, _, _ = self.field_name.rpartition('__')
-            field_name = 'num_%s' % agg
-            qs = qs.annotate(**{field_name: models.Count(agg)})
+            agg, _, _ = field_name.rpartition('__')
+            field_name = 'num_%s' % agg.replace('__', '_')
 
+        return field_name
+
+    def apply_any_annotation(self, qs):
+        if self.field_name.endswith('__count'):
+            field_name = self.annotated_field_name
+            agg, _, _ = self.field_name.rpartition('__')
+            qs = qs.annotate(**{field_name: models.Count(agg, distinct=True)})
+        return qs
+
+    def filter_kwargs(self, qs, now=datetime.now):
+        # Support Count() as m2m__count
+        field_name = self.annotated_field_name
         field_name = '__'.join([field_name, self.lookup_type])
         field_value = self.field_value
 
         # set time deltas and dates
         if field_value.startswith('now-'):
             field_value = self.field_value.replace('now-', '')
-            delta = djangotimedelta.parse(field_value)
-            field_value = now() - delta
+            field_value = now() - djangotimedelta.parse(field_value)
         elif field_value.startswith('now+'):
             field_value = self.field_value.replace('now+', '')
-            delta = djangotimedelta.parse(field_value)
-            field_value = now() + delta
+            field_value = now() + djangotimedelta.parse(field_value)
+        elif field_value.startswith('today-'):
+            field_value = self.field_value.replace('today-', '')
+            field_value = now().date() - djangotimedelta.parse(field_value)
+        elif field_value.startswith('today+'):
+            field_value = self.field_value.replace('today+', '')
+            field_value = now().date() + djangotimedelta.parse(field_value)
 
         # set booleans
         if field_value == 'True':
@@ -137,6 +152,13 @@ class QuerySetRule(models.Model):
             field_value = False
 
         kwargs = {field_name: field_value}
+
+        return kwargs
+
+    def apply(self, qs, now=datetime.now):
+
+        kwargs = self.filter_kwargs(qs, now)
+        qs = self.apply_any_annotation(qs)
 
         if self.method_type == 'filter':
             return qs.filter(**kwargs)
