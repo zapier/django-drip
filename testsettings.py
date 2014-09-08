@@ -36,3 +36,5 @@ MIDDLEWARE_CLASSES = (
 AUTH_PROFILE_MODULE = 'credits.Profile'
 
 ROOT_URLCONF = 'test_urls'
+
+STATIC_URL = 'static/'
