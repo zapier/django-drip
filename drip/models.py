@@ -1,7 +1,12 @@
 from datetime import datetime, timedelta
 
 from django.db import models
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except:
+    from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
 # just using this to parse, but totally insane package naming...
@@ -53,7 +58,7 @@ class SentDrip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     drip = models.ForeignKey('drip.Drip', related_name='sent_drips')
-    user = models.ForeignKey('auth.User', related_name='sent_drips')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_drips')
 
     subject = models.TextField()
     body = models.TextField()
