@@ -54,7 +54,7 @@
       $(this).parent().remove();
     });
 
-    $(document).on("focusin click keyup", "div.tabular td.field-field_name input, grp-td.field_name input", function() {
+    $(document).on("focusin click keyup", "div.tabular td.field-field_name input, .grp-td.field_name input", function() {
       pull_field_name(this);
     });
 
