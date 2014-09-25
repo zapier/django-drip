@@ -3,7 +3,6 @@ import six
 from datetime import datetime, timedelta
 
 from django.db import models
-from django.db.models import F
 
 try:
     from django.conf import settings
@@ -161,9 +160,9 @@ class QuerySetRule(models.Model):
             field_value = now().date() + djangotimedelta.parse(field_value)
 
         # F expressions
-        if field_value.startswith('F_'):
+        if self.field_value.startswith('F_'):
             field_value = self.field_value.replace('F_', '')
-            field_value = F(field_value)
+            field_value = models.F(field_value)
 
         # set booleans
         if field_value == 'True':
