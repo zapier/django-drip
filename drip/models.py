@@ -146,16 +146,16 @@ class QuerySetRule(models.Model):
         field_value = self.field_value
 
         # set time deltas and dates
-        if field_value.startswith('now-'):
+        if self.field_value.startswith('now-'):
             field_value = self.field_value.replace('now-', '')
             field_value = now() - djangotimedelta.parse(field_value)
-        elif field_value.startswith('now+'):
+        elif self.field_value.startswith('now+'):
             field_value = self.field_value.replace('now+', '')
             field_value = now() + djangotimedelta.parse(field_value)
-        elif field_value.startswith('today-'):
+        elif self.field_value.startswith('today-'):
             field_value = self.field_value.replace('today-', '')
             field_value = now().date() - djangotimedelta.parse(field_value)
-        elif field_value.startswith('today+'):
+        elif self.field_value.startswith('today+'):
             field_value = self.field_value.replace('today+', '')
             field_value = now().date() + djangotimedelta.parse(field_value)
 
@@ -165,9 +165,9 @@ class QuerySetRule(models.Model):
             field_value = models.F(field_value)
 
         # set booleans
-        if field_value == 'True':
+        if self.field_value == 'True':
             field_value = True
-        if field_value == 'False':
+        if self.field_value == 'False':
             field_value = False
 
         kwargs = {field_name: field_value}
