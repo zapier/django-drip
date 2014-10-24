@@ -26,7 +26,7 @@ Django Drip is a simple app for creating drip campaigns for email using Django's
 
     # define the email template we want to send
     subject_template = 'Thanks {{ user.username }}!'
-    body_template = 'We appreciate you buying {{ user.get_profile.credits }} credits! Please buy more!'
+    body_template = 'We appreciate you buying {{ user.profile.credits }} credits! Please buy more!'
 
     # render and send the email
     for user in users:

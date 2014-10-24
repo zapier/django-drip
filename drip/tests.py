@@ -32,6 +32,7 @@ class RulesTestCase(TestCase):
 
 
 class DripsTestCase(TestCase):
+
     def setUp(self):
         """
         Creates 20 users, half of which buy 25 credits a day,
@@ -44,14 +45,13 @@ class DripsTestCase(TestCase):
             user = User.objects.create(username='%s_25_credits_a_day' % name, email='%s@test.com' % name)
             User.objects.filter(id=user.id).update(date_joined=start - timedelta(days=i))
 
-            profile = user.get_profile()
+            profile = user.profile
             profile.credits = i * 25
             profile.save()
 
         for i, name in enumerate(num_string):
             user = User.objects.create(username='%s_no_credits' % name, email='%s@test.com' % name)
             User.objects.filter(id=user.id).update(date_joined=start - timedelta(days=i))
-
 
     def test_users_exists(self):
         self.assertEqual(20, User.objects.all().count())
@@ -176,7 +176,7 @@ class DripsTestCase(TestCase):
 
         # vanilla (now-8, now-7), past (now-8-3, now-7-3), future (now-8+1, now-7+1)
         for count, shifted_drip in zip([0, 2, 2, 2, 2], drip.walk(into_past=3, into_future=2)):
-            self.assertEquals(count, shifted_drip.get_queryset().count())
+            self.assertEqual(count, shifted_drip.get_queryset().count())
 
         # no reason to change after a send...
         drip.send()
@@ -184,7 +184,7 @@ class DripsTestCase(TestCase):
 
         # vanilla (now-8, now-7), past (now-8-3, now-7-3), future (now-8+1, now-7+1)
         for count, shifted_drip in zip([0, 2, 2, 2, 2], drip.walk(into_past=3, into_future=2)):
-            self.assertEquals(count, shifted_drip.get_queryset().count())
+            self.assertEqual(count, shifted_drip.get_queryset().count())
 
     def test_custom_drip_with_count(self):
         model_drip = self.build_joined_date_drip()
@@ -199,7 +199,7 @@ class DripsTestCase(TestCase):
         self.assertEqual(1, drip.get_queryset().count()) # 1 person meet the criteria
 
         for count, shifted_drip in zip([0, 1, 1, 1, 1], drip.walk(into_past=3, into_future=2)):
-            self.assertEquals(count, shifted_drip.get_queryset().count())
+            self.assertEqual(count, shifted_drip.get_queryset().count())
 
     def test_custom_drip_static_datetime(self):
         model_drip = self.build_joined_date_drip()
@@ -212,7 +212,7 @@ class DripsTestCase(TestCase):
         drip = model_drip.drip
 
         for count, shifted_drip in zip([0, 2, 2, 0, 0], drip.walk(into_past=3, into_future=2)):
-            self.assertEquals(count, shifted_drip.get_queryset().count())
+            self.assertEqual(count, shifted_drip.get_queryset().count())
 
     def test_custom_drip_static_now_datetime(self):
         model_drip = Drip.objects.create(
@@ -230,7 +230,7 @@ class DripsTestCase(TestCase):
 
         # catches "today and yesterday" users
         for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
-            self.assertEquals(count, shifted_drip.get_queryset().count())
+            self.assertEqual(count, shifted_drip.get_queryset().count())
 
 
 # Used by CustomMessagesTest
@@ -268,16 +268,16 @@ class CustomMessagesTest(TestCase):
 
     def test_default_email(self):
         result = self.model_drip.drip.send()
-        self.assertEquals(1, result)
-        self.assertEquals(1, len(mail.outbox))
+        self.assertEqual(1, result)
+        self.assertEqual(1, len(mail.outbox))
         email = mail.outbox.pop()
         self.assertIsInstance(email, mail.EmailMultiAlternatives)
 
     def test_custom_added_not_used(self):
         settings.DRIP_MESSAGE_CLASSES = {'plain': 'drip.tests.PlainDripEmail'}
         result = self.model_drip.drip.send()
-        self.assertEquals(1, result)
-        self.assertEquals(1, len(mail.outbox))
+        self.assertEqual(1, result)
+        self.assertEqual(1, len(mail.outbox))
         email = mail.outbox.pop()
         # Since we did not specify custom class, default should be used.
         self.assertIsInstance(email, mail.EmailMultiAlternatives)
@@ -287,8 +287,8 @@ class CustomMessagesTest(TestCase):
         self.model_drip.message_class = 'plain'
         self.model_drip.save()
         result = self.model_drip.drip.send()
-        self.assertEquals(1, result)
-        self.assertEquals(1, len(mail.outbox))
+        self.assertEqual(1, result)
+        self.assertEqual(1, len(mail.outbox))
         email = mail.outbox.pop()
         # In this case we did specify the custom key, so message should be of custom type.
         self.assertIsInstance(email, mail.EmailMessage)
@@ -296,7 +296,7 @@ class CustomMessagesTest(TestCase):
     def test_override_default(self):
         settings.DRIP_MESSAGE_CLASSES = {'default': 'drip.tests.PlainDripEmail'}
         result = self.model_drip.drip.send()
-        self.assertEquals(1, result)
-        self.assertEquals(1, len(mail.outbox))
+        self.assertEqual(1, result)
+        self.assertEqual(1, len(mail.outbox))
         email = mail.outbox.pop()
         self.assertIsInstance(email, mail.EmailMessage)
