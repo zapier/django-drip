@@ -1,9 +1,16 @@
 import base64
 import json
+import six
 
 from django import forms
 from django.contrib import admin
-from django.contrib.auth.models import User
+from django.db import models
+
+try:
+    from django.conf import settings
+    User = settings.AUTH_USER_MODEL
+except AttributeError:
+    from django.contrib.auth.models import User
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import configured_message_classes, message_class_for
@@ -19,6 +26,7 @@ class DripForm(forms.ModelForm):
     )
     class Meta:
         model = Drip
+        exclude = []
 
 
 class DripAdmin(admin.ModelAdmin):
@@ -38,11 +46,14 @@ class DripAdmin(admin.ModelAdmin):
         drip = get_object_or_404(Drip, id=drip_id)
 
         shifted_drips = []
+        seen_users = set()
         for shifted_drip in drip.drip.walk(into_past=int(into_past), into_future=int(into_future)+1):
+            shifted_drip.prune()
             shifted_drips.append({
                 'drip': shifted_drip,
-                'qs': shifted_drip.get_queryset()
+                'qs': shifted_drip.get_queryset().exclude(id__in=seen_users)
             })
+            seen_users.update(shifted_drip.get_queryset().values_list('id', flat=True))
 
         return render(request, 'drip/timeline.html', locals())
 
@@ -50,10 +61,15 @@ class DripAdmin(admin.ModelAdmin):
         from django.shortcuts import render, get_object_or_404
         from django.http import HttpResponse
         drip = get_object_or_404(Drip, id=drip_id)
-        user = get_object_or_404(User, id=user_id)
+
+        if isinstance(User, six.string_types):
+            app_label, model_name = User.split('.')
+            UserModel = models.get_model(app_label, model_name)
+
+        user = get_object_or_404(UserModel, id=user_id)
         drip_message = message_class_for(drip.message_class)(drip.drip, user)
 
-        html = ''
+        html = drip_message.message.body
         for body, mime in drip_message.message.alternatives:
             if mime == 'text/html':
                 html = body
