@@ -25,6 +25,9 @@ except ImportError:
     conditional_now = datetime.now
 
 
+import logging
+
+
 def configured_message_classes():
     conf_dict = getattr(settings, 'DRIP_MESSAGE_CLASSES', {})
     if 'default' not in conf_dict:
@@ -234,17 +237,21 @@ class DripBase(object):
         count = 0
         for user in self.get_queryset():
             message_instance = MessageClass(self, user)
-            result = message_instance.message.send()
-            if result:
-                SentDrip.objects.create(
-                    drip=self.drip_model,
-                    user=user,
-                    from_email=self.from_email,
-                    from_email_name=self.from_email_name,
-                    subject=message_instance.subject,
-                    body=message_instance.body
-                )
-                count += 1
+            try:
+                result = message_instance.message.send()
+                if result:
+                    SentDrip.objects.create(
+                        drip=self.drip_model,
+                        user=user,
+                        from_email=self.from_email,
+                        from_email_name=self.from_email_name,
+                        subject=message_instance.subject,
+                        body=message_instance.body
+                    )
+                    count += 1
+            except Exception, e:
+                logging.error("Failed to send drip %s to user: %s" % (self.drip_model.id, user))
+                logging.error(e)
 
         return count
 
