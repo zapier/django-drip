@@ -53,9 +53,9 @@ def get_package_data(package):
 if sys.argv[-1] == 'publish':
     os.system("python setup.py sdist upload")
     args = {'version': get_version(package)}
-    print "You probably want to also tag the version now:"
-    print "  git tag -a %(version)s -m 'version %(version)s'" % args
-    print "  git push --tags"
+    print("You probably want to also tag the version now:")
+    print("  git tag -a %(version)s -m 'version %(version)s'" % args)
+    print("  git push --tags")
     sys.exit()
 
 
@@ -69,5 +69,22 @@ setup(
     author_email=author_email,
     packages=get_packages(package),
     package_data=get_package_data(package),
-    install_requires=install_requires
+    install_requires=install_requires,
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Framework :: Django',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ],
 )

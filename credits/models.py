@@ -6,11 +6,11 @@ class Profile(models.Model):
     """
     For testing, track the number of "credits".
     """
-    user = models.ForeignKey('auth.User')
+    user = models.OneToOneField('auth.User', related_name='profile')
     credits = models.PositiveIntegerField(default=0)
 
 
 def user_post_save(sender, instance, created, raw, **kwargs):
     if created:
-        profile = Profile.objects.create(user=instance)
+        Profile.objects.create(user=instance)
 models.signals.post_save.connect(user_post_save, sender=User)
