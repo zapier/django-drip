@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext as _
+
 
 try:
     from django.contrib.auth import get_user_model
@@ -21,18 +23,18 @@ class Drip(models.Model):
     name = models.CharField(
         max_length=255,
         unique=True,
-        verbose_name='Drip Name',
-        help_text='A unique name for this drip.')
+        verbose_name=_('Drip Name'),
+        help_text=_('A unique name for this drip.'))
 
     enabled = models.BooleanField(default=False)
 
     from_email = models.EmailField(null=True, blank=True,
-        help_text='Set a custom from email.')
+        help_text=_('Set a custom from email.'))
     from_email_name = models.CharField(max_length=150, null=True, blank=True,
-        help_text="Set a name for a custom from email.")
+        help_text=_("Set a name for a custom from email."))
     subject_template = models.TextField(null=True, blank=True)
     body_html_template = models.TextField(null=True, blank=True,
-        help_text='You will have settings and user in the context.')
+        help_text=_('You will have settings and user in the context.'))
     message_class = models.CharField(max_length=120, blank=True, default='default')
 
     @property
@@ -72,25 +74,25 @@ class SentDrip(models.Model):
 
 
 METHOD_TYPES = (
-    ('filter', 'Filter'),
-    ('exclude', 'Exclude'),
+    ('filter', _('Filter')),
+    ('exclude', _('Exclude')),
 )
 
 LOOKUP_TYPES = (
-    ('exact', 'exactly'),
-    ('iexact', 'exactly (case insensitive)'),
-    ('contains', 'contains'),
-    ('icontains', 'contains (case insensitive)'),
-    ('regex', 'regex'),
-    ('iregex', 'contains (case insensitive)'),
-    ('gt', 'greater than'),
-    ('gte', 'greater than or equal to'),
-    ('lt', 'lesser than'),
-    ('lte', 'lesser than or equal to'),
-    ('startswith', 'starts with'),
-    ('endswith', 'starts with'),
-    ('istartswith', 'ends with (case insensitive)'),
-    ('iendswith', 'ends with (case insensitive)'),
+    ('exact', _('exactly')),
+    ('iexact', _('exactly (case insensitive)')),
+    ('contains', _('contains')),
+    ('icontains', _('contains (case insensitive)')),
+    ('regex', _('regex')),
+    ('iregex', _('contains (case insensitive)')),
+    ('gt', _('greater than')),
+    ('gte', _('greater than or equal to')),
+    ('lt', _('lesser than')),
+    ('lte', _('lesser than or equal to')),
+    ('startswith', _('starts with')),
+    ('endswith', _('starts with')),
+    ('istartswith', _('ends with (case insensitive)')),
+    ('iendswith', _('ends with (case insensitive)')),
 )
 
 class QuerySetRule(models.Model):

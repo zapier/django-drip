@@ -36,6 +36,15 @@ INSTALLED_APPS = (
 
 Don't forget to add `DRIP_FROM_EMAIL` to settings.py, or else we will fall back to `EMAIL_HOST_USER`.
 
+For instance, send the email from your gmail account
+```
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'youremail@gmail.com'
+EMAIL_HOST_PASSWORD = 'yourpassword'
+EMAIL_PORT = 587
+```
+
 Finally, be sure to run `python manage.py syncdb` or `python manage.py migrate drip` to set up
 the necessary database tables.
 
