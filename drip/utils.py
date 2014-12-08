@@ -93,3 +93,11 @@ def give_model_field(full_field, Model):
 def get_simple_fields(Model, **kwargs):
     return [[f[0], f[3].__name__] for f in get_fields(Model, **kwargs)]
 
+def get_user_model():
+    # handle 1.7 and back
+    try:
+        from django.contrib.auth import get_user_model as django_get_user_model
+        User = django_get_user_model()
+    except ImportError:
+        from django.contrib.auth.models import User
+    return User

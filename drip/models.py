@@ -2,12 +2,9 @@ from datetime import datetime, timedelta
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
-try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
-    from django.contrib.auth.models import User
+from drip.utils import get_user_model
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
@@ -58,7 +55,7 @@ class SentDrip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     drip = models.ForeignKey('drip.Drip', related_name='sent_drips')
-    user = models.ForeignKey(User, related_name='sent_drips')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_drips')
 
     subject = models.TextField()
     body = models.TextField()
@@ -108,6 +105,7 @@ class QuerySetRule(models.Model):
                    '`now-7 days` or `now+3 days` for fancy timedelta.'))
 
     def clean(self):
+        User = get_user_model()
         try:
             self.apply(User.objects.all())
         except Exception as e:
