@@ -1,0 +1,64 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_static admin_list %}
+{% load url from future %}
+{% load admin_urls %}
+
+{% block object-tools-items %}
+  <li><a href="{% url 'admin:drip_timeline' original.drip.id 4 7 %}" class="">View Timeline</a></li>
+  <li><a href="history/" class="historylink">{% trans "History" %}</a></li>
+  {% if has_absolute_url %}<li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
+{% endblock %}
+
+{% block after_related_objects %}
+<style type="text/css" media="screen">
+  ul.field-name-selector { overflow:auto; margin:0; padding:0;}
+  ul.field-name-selector li { 
+    list-style:none; 
+    float:left; 
+    margin:0 4px 4px 0; 
+    padding:2px 4px; 
+    background:#f7f7f7; 
+    border:1px #ccc solid; 
+    cursor:pointer;
+  }
+  ul.field-name-selector li:hover {
+    background:#eee;
+  }
+</style>
+
+<script type="text/javascript" charset="utf-8">
+(function($) { 
+  $(document).ready(function($) {
+
+    var data = {{field_data|safe}};
+
+    function pull_field_name(target) {
+      // target is input
+      $(target).parent().find("ul").remove();
+      
+      var ul = $("<ul class='field-name-selector'/>");
+      $(target).parent().append(ul);
+      var val = $(target).val();
+
+      for (var i=0; i < data.length; i++) {
+        var item = data[i];
+        if (item[0].indexOf(val) != -1) {
+          $(ul).append("<li data-field='"+item[0]+"'>"+item[0]+" ("+item[1]+")</li>");
+        }
+      };
+    }
+
+    $("ul.field-name-selector li").live("click", function() {
+      // clicking a pill clears all pills and places the value in
+      $(this).parent().parent().find("input").val($(this).attr('data-field'));
+      $(this).parent().remove();
+    });
+
+    $("div.tabular td.field-field_name input").live("focusin click keyup", function() {
+      pull_field_name(this);
+    });
+
+  }); 
+})(django.jQuery);
+</script>
+{% endblock %}
