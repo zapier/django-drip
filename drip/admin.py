@@ -1,6 +1,5 @@
 import base64
 import json
-import six
 
 from django import forms
 from django.contrib import admin

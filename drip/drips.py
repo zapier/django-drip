@@ -1,5 +1,4 @@
 import operator
-import six
 import functools
 
 from django.conf import settings

@@ -1,4 +1,3 @@
-import six
 from datetime import datetime, timedelta
 
 from django.test import TestCase
@@ -10,7 +9,7 @@ from django.conf import settings
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase, DripMessage
-from drip.utils import get_user_model
+from drip.utils import get_user_model, unicode
 
 from credits.models import Profile
 
@@ -303,7 +302,7 @@ class DripsTestCase(TestCase):
         response = match.func(request, *match.args, **match.kwargs)
 
         # check that our admin (not excluded from test) is shown once.
-        self.assertEqual(six.text_type(response.content).count(admin.email), 1)
+        self.assertEqual(unicode(response.content).count(admin.email), 1)
 
 
     ##################

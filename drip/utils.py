@@ -1,8 +1,20 @@
-import six
+import sys
 
 from django.db import models
 from django.db.models import ForeignKey, OneToOneField, ManyToManyField
 from django.db.models.related import RelatedObject
+
+# taking a nod from python-requests and skipping six
+_ver = sys.version_info
+is_py2 = (_ver[0] == 2)
+is_py3 = (_ver[0] == 3)
+
+if is_py2:
+    basestring = basestring
+    unicode = unicode
+elif is_py3:
+    basestring = (str, bytes)
+    unicode = str
 
 
 def get_fields(Model, 
@@ -25,7 +37,7 @@ def get_fields(Model,
         model_stack = []
 
     # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
-    if isinstance(Model, six.string_types):
+    if isinstance(Model, basestring):
         app_label, model_name = Model.split('.')
         Model = models.get_model(app_label, model_name)
 
