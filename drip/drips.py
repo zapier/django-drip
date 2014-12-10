@@ -242,7 +242,7 @@ class DripBase(object):
                         body=message_instance.body
                     )
                     count += 1
-            except Exception, e:
+            except Exception as e:
                 logging.error("Failed to send drip %s to user %s: %s" % (self.drip_model.id, user, e))
 
         return count
