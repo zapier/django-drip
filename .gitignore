@@ -6,3 +6,6 @@ build/
 docs/_build/
 *.egg-info/
 .idea/
+
+sqlite.db
+settings.py

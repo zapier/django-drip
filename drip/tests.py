@@ -1,13 +1,18 @@
+import six
 from datetime import datetime, timedelta
 
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import resolve, reverse
 from django.core import mail
 from django.conf import settings
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase, DripMessage
 from drip.utils import get_user_model
+
+from credits.models import Profile
 
 
 class RulesTestCase(TestCase):
@@ -47,7 +52,7 @@ class DripsTestCase(TestCase):
             user = self.User.objects.create(username='%s_25_credits_a_day' % name, email='%s@test.com' % name)
             self.User.objects.filter(id=user.id).update(date_joined=start - timedelta(days=i))
 
-            profile = user.profile
+            profile = Profile.objects.get(user=user)
             profile.credits = i * 25
             profile.save()
 
@@ -139,7 +144,7 @@ class DripsTestCase(TestCase):
 
     def test_custom_drip(self):
         """
-        Test a simple 
+        Test a simple
         """
         model_drip = self.build_joined_date_drip()
         drip = model_drip.drip
@@ -203,6 +208,35 @@ class DripsTestCase(TestCase):
         for count, shifted_drip in zip([0, 1, 1, 1, 1], drip.walk(into_past=3, into_future=2)):
             self.assertEqual(count, shifted_drip.get_queryset().count())
 
+    def test_exclude_and_include(self):
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__credits',
+            lookup_type='gte',
+            field_value='1'
+        )
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__credits',
+            method_type='exclude',
+            lookup_type='exact',
+            field_value=100
+        )
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__credits',
+            method_type='exclude',
+            lookup_type='exact',
+            field_value=125
+        )
+        self.assertEqual(7, model_drip.drip.get_queryset().count()) # 7 people meet the criteria
+
     def test_custom_drip_static_datetime(self):
         model_drip = self.build_joined_date_drip()
         QuerySetRule.objects.create(
@@ -233,6 +267,146 @@ class DripsTestCase(TestCase):
         # catches "today and yesterday" users
         for count, shifted_drip in zip([4, 4, 4, 4, 4], drip.walk(into_past=3, into_future=3)):
             self.assertEqual(count, shifted_drip.get_queryset().count())
+
+    def test_admin_timeline_prunes_user_output(self):
+        """multiple users in timeline is confusing."""
+        admin = self.User.objects.create(username='admin', email='admin@example.com')
+        admin.is_staff=True
+        admin.is_superuser=True
+        admin.save()
+
+        # create a drip campaign that will surely give us duplicates.
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='date_joined',
+            lookup_type='gte',
+            field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+        )
+
+        # then get it's admin view.
+        rf = RequestFactory()
+        timeline_url = reverse('admin:drip_timeline', kwargs={
+                                    'drip_id': model_drip.id,
+                                    'into_past': 3,
+                                    'into_future': 3})
+
+        request = rf.get(timeline_url)
+        request.user = admin
+
+        match = resolve(timeline_url)
+
+        response = match.func(request, *match.args, **match.kwargs)
+
+        # check that our admin (not excluded from test) is shown once.
+        self.assertEqual(six.text_type(response.content).count(admin.email), 1)
+
+
+    ##################
+    ### TEST M2M   ###
+    ##################
+
+    def test_annotated_field_name_property_no_count(self):
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='date_joined',
+            lookup_type='exact',
+            field_value=2
+        )
+        self.assertEqual(qsr.annotated_field_name, 'date_joined')
+
+    def test_annotated_field_name_property_with_count(self):
+
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='userprofile__user__groups__count',
+            lookup_type='exact',
+            field_value=2
+        )
+
+        self.assertEqual(qsr.annotated_field_name, 'num_userprofile_user_groups')
+
+    def test_apply_annotations_no_count(self):
+
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='date_joined',
+            lookup_type='exact',
+            field_value=2
+        )
+
+        qs = qsr.apply_any_annotation(None)
+
+        self.assertEqual(qs, None)
+
+    def test_apply_annotations_with_count(self):
+
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__user__groups__count',
+            lookup_type='exact',
+            field_value=2
+        )
+
+        qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
+
+        self.assertEqual(list(qs.query.aggregate_select.keys()), ['num_profile_user_groups'])
+
+    def test_apply_multiple_rules_with_aggregation(self):
+
+        model_drip = Drip.objects.create(
+            name='A Custom Week Ago',
+            subject_template='HELLO {{ user.username }}',
+            body_html_template='KETTEHS ROCK!'
+        )
+
+        qsr = QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='profile__user__groups__count',
+            lookup_type='exact',
+            field_value='0'
+        )
+
+        QuerySetRule.objects.create(
+            drip=model_drip,
+            field_name='date_joined',
+            lookup_type='gte',
+            field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+        )
+
+
+        qsr.clean()
+        qs = model_drip.drip.apply_queryset_rules(model_drip.drip.get_queryset())
+
+        self.assertEqual(qs.count(), 4)
 
 
 # Used by CustomMessagesTest
