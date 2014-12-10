@@ -37,6 +37,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+USE_TZ = True
+TIME_ZONE = 'UTC'
+
 AUTH_PROFILE_MODULE = 'credits.Profile'
 
 ROOT_URLCONF = 'test_urls'

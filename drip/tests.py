@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import resolve, reverse
 from django.core import mail
 from django.conf import settings
+from django.utils import timezone
 
 from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase, DripMessage
@@ -44,7 +45,7 @@ class DripsTestCase(TestCase):
         """
         self.User = get_user_model()
 
-        start = datetime.now() - timedelta(hours=2)
+        start = timezone.now() - timedelta(hours=2)
         num_string = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth']
 
         for i, name in enumerate(num_string):
@@ -63,43 +64,43 @@ class DripsTestCase(TestCase):
         self.assertEqual(20, self.User.objects.all().count())
 
     def test_day_zero_users(self):
-        start = datetime.now() - timedelta(days=1)
-        end = datetime.now()
+        start = timezone.now() - timedelta(days=1)
+        end = timezone.now()
         self.assertEqual(2, self.User.objects.filter(date_joined__range=(start, end)).count())
 
     def test_day_two_users_active(self):
-        start = datetime.now() - timedelta(days=3)
-        end = datetime.now() - timedelta(days=2)
+        start = timezone.now() - timedelta(days=3)
+        end = timezone.now() - timedelta(days=2)
         self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
                                                 profile__credits__gt=0).count())
 
     def test_day_two_users_inactive(self):
-        start = datetime.now() - timedelta(days=3)
-        end = datetime.now() - timedelta(days=2)
+        start = timezone.now() - timedelta(days=3)
+        end = timezone.now() - timedelta(days=2)
         self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
                                                 profile__credits=0).count())
 
     def test_day_seven_users_active(self):
-        start = datetime.now() - timedelta(days=8)
-        end = datetime.now() - timedelta(days=7)
+        start = timezone.now() - timedelta(days=8)
+        end = timezone.now() - timedelta(days=7)
         self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
                                                 profile__credits__gt=0).count())
 
     def test_day_seven_users_inactive(self):
-        start = datetime.now() - timedelta(days=8)
-        end = datetime.now() - timedelta(days=7)
+        start = timezone.now() - timedelta(days=8)
+        end = timezone.now() - timedelta(days=7)
         self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
                                                 profile__credits=0).count())
 
     def test_day_fourteen_users_active(self):
-        start = datetime.now() - timedelta(days=15)
-        end = datetime.now() - timedelta(days=14)
+        start = timezone.now() - timedelta(days=15)
+        end = timezone.now() - timedelta(days=14)
         self.assertEqual(0, self.User.objects.filter(date_joined__range=(start, end),
                                                 profile__credits__gt=0).count())
 
     def test_day_fourteen_users_inactive(self):
-        start = datetime.now() - timedelta(days=15)
-        end = datetime.now() - timedelta(days=14)
+        start = timezone.now() - timedelta(days=15)
+        end = timezone.now() - timedelta(days=14)
         self.assertEqual(0, self.User.objects.filter(date_joined__range=(start, end),
                                                 profile__credits=0).count())
 
@@ -242,7 +243,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='lte',
-            field_value=(datetime.now() - timedelta(days=8)).strftime('%Y-%m-%d %H:%M:%S')
+            field_value=(timezone.now() - timedelta(days=8)).strftime('%Y-%m-%d %H:%M:%S')
         )
         drip = model_drip.drip
 
@@ -259,7 +260,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
         )
         drip = model_drip.drip
 
@@ -284,7 +285,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
         )
 
         # then get it's admin view.
@@ -398,7 +399,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
         )
 
 
