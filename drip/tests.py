@@ -1,3 +1,4 @@
+import six
 from datetime import datetime, timedelta
 
 from django.test import TestCase
@@ -302,7 +303,7 @@ class DripsTestCase(TestCase):
         response = match.func(request, *match.args, **match.kwargs)
 
         # check that our admin (not excluded from test) is shown once.
-        self.assertEqual(response.content.count(admin.email), 1)
+        self.assertEqual(six.text_type(response.content).count(admin.email), 1)
 
 
     ##################
@@ -377,7 +378,7 @@ class DripsTestCase(TestCase):
 
         qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
 
-        self.assertEqual(qs.query.aggregate_select.keys(), ['num_profile_user_groups'])
+        self.assertEqual(list(qs.query.aggregate_select.keys()), ['num_profile_user_groups'])
 
     def test_apply_multiple_rules_with_aggregation(self):
 

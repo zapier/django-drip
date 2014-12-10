@@ -1,5 +1,6 @@
 import operator
 import six
+import functools
 
 from django.conf import settings
 from django.db.models import Q
@@ -174,7 +175,7 @@ class DripBase(object):
             qs = rule.apply_any_annotation(qs)
 
         if clauses['exclude']:
-            qs = qs.exclude(reduce(operator.or_, clauses['exclude']))
+            qs = qs.exclude(functools.reduce(operator.or_, clauses['exclude']))
         qs = qs.filter(*clauses['filter'])
 
         return qs
