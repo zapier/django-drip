@@ -3,6 +3,7 @@ from django.db import models
 
 
 class Profile(models.Model):
+
     """
     For testing, track the number of "credits".
     """

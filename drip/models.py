@@ -24,13 +24,16 @@ class Drip(models.Model):
     enabled = models.BooleanField(default=False)
 
     from_email = models.EmailField(null=True, blank=True,
-        help_text='Set a custom from email.')
+                                   help_text='Set a custom from email.')
     from_email_name = models.CharField(max_length=150, null=True, blank=True,
-        help_text="Set a name for a custom from email.")
+                                       help_text="Set a name for a custom from email.")
     subject_template = models.TextField(null=True, blank=True)
     body_html_template = models.TextField(null=True, blank=True,
-        help_text='You will have settings and user in the context.')
-    message_class = models.CharField(max_length=120, blank=True, default='default')
+                                          help_text='You will have settings and user in the context.')
+    message_class = models.CharField(
+        max_length=120,
+        blank=True,
+        default='default')
 
     @property
     def drip(self):
@@ -49,23 +52,31 @@ class Drip(models.Model):
 
 
 class SentDrip(models.Model):
+
     """
     Keeps a record of all sent drips.
     """
     date = models.DateTimeField(auto_now_add=True)
 
     drip = models.ForeignKey('drip.Drip', related_name='sent_drips')
-    user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name='sent_drips')
+    user = models.ForeignKey(
+        getattr(
+            settings,
+            'AUTH_USER_MODEL',
+            'auth.User'),
+        related_name='sent_drips')
 
     subject = models.TextField()
     body = models.TextField()
     from_email = models.EmailField(
-        null=True, default=None # For south so that it can migrate existing rows.
+        # For south so that it can migrate existing rows.
+        null=True, default=None
     )
     from_email_name = models.CharField(max_length=150,
-        null=True, default=None # For south so that it can migrate existing rows.
-    )
-
+                                       # For south so that it can migrate
+                                       # existing rows.
+                                       null=True, default=None
+                                       )
 
 
 METHOD_TYPES = (
@@ -90,19 +101,28 @@ LOOKUP_TYPES = (
     ('iendswith', 'ends with (case insensitive)'),
 )
 
+
 class QuerySetRule(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
 
     drip = models.ForeignKey(Drip, related_name='queryset_rules')
 
-    method_type = models.CharField(max_length=12, default='filter', choices=METHOD_TYPES)
-    field_name = models.CharField(max_length=128, verbose_name='Field name of User')
-    lookup_type = models.CharField(max_length=12, default='exact', choices=LOOKUP_TYPES)
+    method_type = models.CharField(
+        max_length=12,
+        default='filter',
+        choices=METHOD_TYPES)
+    field_name = models.CharField(
+        max_length=128,
+        verbose_name='Field name of User')
+    lookup_type = models.CharField(
+        max_length=12,
+        default='exact',
+        choices=LOOKUP_TYPES)
 
     field_value = models.CharField(max_length=255,
-        help_text=('Can be anything from a number, to a string. Or, do ' +
-                   '`now-7 days` or `today+3 days` for fancy timedelta.'))
+                                   help_text=('Can be anything from a number, to a string. Or, do ' +
+                                              '`now-7 days` or `today+3 days` for fancy timedelta.'))
 
     def clean(self):
         User = get_user_model()

@@ -64,13 +64,17 @@ class DripMessage(object):
     @property
     def subject(self):
         if not self._subject:
-            self._subject = Template(self.drip_base.subject_template).render(self.context)
+            self._subject = Template(
+                self.drip_base.subject_template).render(
+                self.context)
         return self._subject
 
     @property
     def body(self):
         if not self._body:
-            self._body = Template(self.drip_base.body_template).render(self.context)
+            self._body = Template(
+                self.drip_base.body_template).render(
+                self.context)
         return self._body
 
     @property
@@ -83,7 +87,8 @@ class DripMessage(object):
     def message(self):
         if not self._message:
             if self.drip_base.from_email_name:
-                from_ = "%s <%s>" % (self.drip_base.from_email_name, self.drip_base.from_email)
+                from_ = "%s <%s>" % (
+                    self.drip_base.from_email_name, self.drip_base.from_email)
             else:
                 from_ = self.drip_base.from_email
 
@@ -97,6 +102,7 @@ class DripMessage(object):
 
 
 class DripBase(object):
+
     """
     A base object for defining a Drip.
 
@@ -115,15 +121,18 @@ class DripBase(object):
 
         self.name = kwargs.pop('name', self.name)
         self.from_email = kwargs.pop('from_email', self.from_email)
-        self.from_email_name = kwargs.pop('from_email_name', self.from_email_name)
-        self.subject_template = kwargs.pop('subject_template', self.subject_template)
+        self.from_email_name = kwargs.pop(
+            'from_email_name',
+            self.from_email_name)
+        self.subject_template = kwargs.pop(
+            'subject_template',
+            self.subject_template)
         self.body_template = kwargs.pop('body_template', self.body_template)
 
         if not self.name:
             raise AttributeError('You must define a name.')
 
         self.now_shift_kwargs = kwargs.get('now_shift_kwargs', {})
-
 
     #########################
     ### DATE MANIPULATION ###
@@ -211,7 +220,7 @@ class DripBase(object):
         exclude_user_ids = SentDrip.objects.filter(date__lt=conditional_now(),
                                                    drip=self.drip_model,
                                                    user__id__in=target_user_ids)\
-                                           .values_list('user_id', flat=True)
+            .values_list('user_id', flat=True)
         self._queryset = self.get_queryset().exclude(id__in=exclude_user_ids)
 
     def send(self):
@@ -224,7 +233,10 @@ class DripBase(object):
         """
 
         if not self.from_email:
-            self.from_email = getattr(settings, 'DRIP_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
+            self.from_email = getattr(
+                settings,
+                'DRIP_FROM_EMAIL',
+                settings.DEFAULT_FROM_EMAIL)
         MessageClass = message_class_for(self.drip_model.message_class)
 
         count = 0
@@ -243,10 +255,11 @@ class DripBase(object):
                     )
                     count += 1
             except Exception as e:
-                logging.error("Failed to send drip %s to user %s: %s" % (self.drip_model.id, user, e))
+                logging.error(
+                    "Failed to send drip %s to user %s: %s" %
+                    (self.drip_model.id, user, e))
 
         return count
-
 
     ####################
     ### USER DEFINED ###
