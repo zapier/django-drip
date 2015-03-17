@@ -4,9 +4,13 @@ import json
 from django import forms
 from django.contrib import admin
 
-from drip.models import Drip, SentDrip, QuerySetRule
+from drip.models import Drip, SentDrip, QuerySetRule, DripSplitSubject
 from drip.drips import configured_message_classes, message_class_for
 from drip.utils import get_user_model
+
+
+class DripSplitSubjectInline(admin.TabularInline):
+    model = DripSplitSubject
 
 
 class QuerySetRuleInline(admin.TabularInline):
@@ -26,6 +30,7 @@ class DripAdmin(admin.ModelAdmin):
     list_display = ('name', 'enabled', 'message_class')
     inlines = [
         QuerySetRuleInline,
+        DripSplitSubjectInline,
     ]
     form = DripForm
 

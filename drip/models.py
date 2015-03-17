@@ -1,14 +1,22 @@
 from datetime import datetime, timedelta
+import random
 
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.utils.functional import cached_property
 
 from drip.utils import get_user_model
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
 import timedelta as djangotimedelta
+
+
+class DripSplitSubject(models.Model):
+    drip = models.ForeignKey('Drip', related_name='split_test_subjects')
+    subject = models.CharField(max_length=150)
+    enabled = models.BooleanField(default=True)
 
 
 class Drip(models.Model):
@@ -46,6 +54,21 @@ class Drip(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @cached_property
+    def get_split_test_subjects(self):
+        return self.split_test_subjects.filter(enabled=True)
+
+    @property
+    def split_test_active(self):
+        if self.get_split_test_subjects:
+            return True
+        return False
+
+    def choose_split_test_subject(self):
+        random_subject = self.get_split_test_subjects.order_by('?')[0]
+        return random_subject.subject
+
 
 
 class SentDrip(models.Model):
