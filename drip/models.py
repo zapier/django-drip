@@ -12,13 +12,6 @@ from drip.utils import get_user_model
 # https://bitbucket.org/schinckel/django-timedelta-field/
 import timedelta as djangotimedelta
 
-
-class DripSplitSubject(models.Model):
-    drip = models.ForeignKey('Drip', related_name='split_test_subjects')
-    subject = models.CharField(max_length=150)
-    enabled = models.BooleanField(default=True)
-
-
 class Drip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
