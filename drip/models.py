@@ -48,20 +48,6 @@ class Drip(models.Model):
     def __unicode__(self):
         return self.name
 
-    @cached_property
-    def get_split_test_subjects(self):
-        return self.split_test_subjects.filter(enabled=True)
-
-    @property
-    def split_test_active(self):
-        if self.get_split_test_subjects:
-            return True
-        return False
-
-    def choose_split_test_subject(self):
-        random_subject = self.get_split_test_subjects.order_by('?')[0]
-        return random_subject.subject
-
 
 
 class SentDrip(models.Model):
