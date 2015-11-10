@@ -8,7 +8,6 @@ from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import configured_message_classes, message_class_for
 from drip.utils import get_user_model
 
-
 class QuerySetRuleInline(admin.TabularInline):
     model = QuerySetRule
 

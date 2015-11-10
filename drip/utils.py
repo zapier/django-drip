@@ -2,7 +2,11 @@ import sys
 
 from django.db import models
 from django.db.models import ForeignKey, OneToOneField, ManyToManyField
-from django.db.models.related import RelatedObject
+# try:
+#    from django.db.models.related import RelatedObject
+# except:
+#   # django 1.8 +
+from django.db.models.fields.related import ForeignObjectRel
 
 # taking a nod from python-requests and skipping six
 _ver = sys.version_info
@@ -17,7 +21,7 @@ elif is_py3:
     unicode = str
 
 
-def get_fields(Model, 
+def get_fields(Model,
                parent_field="",
                model_stack=None,
                stack_limit=2,
@@ -41,7 +45,8 @@ def get_fields(Model,
         app_label, model_name = Model.split('.')
         Model = models.get_model(app_label, model_name)
 
-    fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_all_related_objects()
+    #fields = Model._meta.fields + Model._meta.many_to_many + tuple(Model._meta.get_all_related_objects())
+    fields = Model._meta.get_fields()
     model_stack.append(Model)
 
     # do a variety of checks to ensure recursion isnt being redundant
@@ -66,13 +71,20 @@ def get_fields(Model,
     for field in fields:
         field_name = field.name
 
-        if isinstance(field, RelatedObject):
+        # if instance(field, Man)
+
+        if isinstance(field, ForeignObjectRel):
+            # from pdb import set_trace
+            # set_trace()
+            # print (field, type(field))
             field_name = field.field.related_query_name()
 
         if parent_field:
             full_field = "__".join([parent_field, field_name])
         else:
             full_field = field_name
+
+        # print (field, field_name, full_field)
 
         if len([True for exclude in excludes if (exclude in full_field)]):
             continue
@@ -81,14 +93,22 @@ def get_fields(Model,
         out_fields.append([full_field, field_name, Model, field.__class__])
 
         if not stop_recursion and \
-                (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or \
-                isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
+                isinstance(field, ForeignObjectRel):
+                # (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or \
+                # isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
 
-            if isinstance(field, RelatedObject):
+            # from pdb import set_trace
+            # set_trace()
+            if not isinstance(field, ForeignObjectRel):
                 RelModel = field.model
-                #field_names.extend(get_fields(RelModel, full_field, True))
             else:
-                RelModel = field.related.parent_model
+                RelModel = field.related_model
+            # print (RelModel)
+            # if isinstance(field, RelatedObject):
+            #     RelModel = field.model
+            #     #field_names.extend(get_fields(RelModel, full_field, True))
+            # else:
+            #     RelModel = field.related.parent_model
 
             out_fields.extend(get_fields(RelModel, full_field, list(model_stack)))
 

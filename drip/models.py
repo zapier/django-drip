@@ -1,15 +1,16 @@
 from datetime import datetime, timedelta
+import random
 
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.utils.functional import cached_property
 
 from drip.utils import get_user_model
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
 import timedelta as djangotimedelta
-
 
 class Drip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
@@ -46,6 +47,7 @@ class Drip(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 
 class SentDrip(models.Model):
