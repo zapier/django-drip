@@ -66,7 +66,7 @@ def get_fields(Model,
     for field in fields:
         field_name = field.name
 
-        if isinstance(field, RelatedObject):
+        if isinstance(field, ForeignObjectRel):
             field_name = field.field.related_query_name()
 
         if parent_field:
@@ -82,9 +82,9 @@ def get_fields(Model,
 
         if not stop_recursion and \
                 (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or \
-                isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
+                isinstance(field, ForeignObjectRel) or isinstance(field, ManyToManyField)):
 
-            if isinstance(field, RelatedObject):
+            if isinstance(field, ForeignObjectRel):
                 RelModel = field.model
                 #field_names.extend(get_fields(RelModel, full_field, True))
             else:
