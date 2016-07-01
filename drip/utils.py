@@ -80,11 +80,8 @@ def get_fields(Model,
         # add to the list
         out_fields.append([full_field, field_name, Model, field.__class__])
 
-        if not stop_recursion and \
-                (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or \
-                isinstance(field, ForeignObjectRel) or isinstance(field, ManyToManyField)):
-
-            if isinstance(field, ForeignObjectRel):
+        if not stop_recursion:
+            if not isinstance(field, ForeignObjectRel):
                 RelModel = field.model
                 #field_names.extend(get_fields(RelModel, full_field, True))
             else:
