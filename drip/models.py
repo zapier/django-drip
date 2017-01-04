@@ -88,6 +88,7 @@ LOOKUP_TYPES = (
     ('endswith', 'starts with'),
     ('istartswith', 'ends with (case insensitive)'),
     ('iendswith', 'ends with (case insensitive)'),
+    ('isnull', 'is null (empty value)'),
 )
 
 class QuerySetRule(models.Model):
