@@ -1,17 +1,8 @@
-SECRET_KEY = 'dripdripdripdripdripdripdrip'
-
-# MUST SPECIFY TO MAKE USE OF DJANGO DRIP
-DRIP_FROM_EMAIL = ''
-DEBUG = True
-
-SECRET_KEY = 'whatever/you/want-goes-here'
-
 SECRET_KEY="whatever"
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'sqlite.db',
     },
 }
 
@@ -21,11 +12,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
-
     'drip',
-
-    # testing only
-    'credits',
+    'tests',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -40,9 +28,11 @@ MIDDLEWARE_CLASSES = (
 USE_TZ = True
 TIME_ZONE = 'UTC'
 
-AUTH_PROFILE_MODULE = 'credits.Profile'
+AUTH_PROFILE_MODULE = 'tests.Profile'
 
-ROOT_URLCONF = 'test_urls'
+ROOT_URLCONF = 'tests.urls'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = ()
+
+DRIP_FROM_EMAIL = ''

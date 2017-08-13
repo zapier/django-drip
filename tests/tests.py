@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -12,7 +12,7 @@ from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase, DripMessage
 from drip.utils import get_user_model, unicode
 
-from credits.models import Profile
+from .models import Profile
 
 
 class RulesTestCase(TestCase):
@@ -452,7 +452,7 @@ class CustomMessagesTest(TestCase):
         self.assertIsInstance(email, mail.EmailMultiAlternatives)
 
     def test_custom_added_not_used(self):
-        settings.DRIP_MESSAGE_CLASSES = {'plain': 'drip.tests.PlainDripEmail'}
+        settings.DRIP_MESSAGE_CLASSES = {'plain': '%s.PlainDripEmail' % __name__}
         result = self.model_drip.drip.send()
         self.assertEqual(1, result)
         self.assertEqual(1, len(mail.outbox))
@@ -461,7 +461,7 @@ class CustomMessagesTest(TestCase):
         self.assertIsInstance(email, mail.EmailMultiAlternatives)
 
     def test_custom_added_and_used(self):
-        settings.DRIP_MESSAGE_CLASSES = {'plain': 'drip.tests.PlainDripEmail'}
+        settings.DRIP_MESSAGE_CLASSES = {'plain': '%s.PlainDripEmail' % __name__}
         self.model_drip.message_class = 'plain'
         self.model_drip.save()
         result = self.model_drip.drip.send()
@@ -472,7 +472,7 @@ class CustomMessagesTest(TestCase):
         self.assertIsInstance(email, mail.EmailMessage)
 
     def test_override_default(self):
-        settings.DRIP_MESSAGE_CLASSES = {'default': 'drip.tests.PlainDripEmail'}
+        settings.DRIP_MESSAGE_CLASSES = {'default': '%s.PlainDripEmail' % __name__}
         result = self.model_drip.drip.send()
         self.assertEqual(1, result)
         self.assertEqual(1, len(mail.outbox))
