@@ -3,6 +3,7 @@ sudo: no
 language: python
 
 env:
+  - TOXENV=flake8
   - TOXENV=py27-1.4
   - TOXENV=py27-1.5
   - TOXENV=py27-1.6

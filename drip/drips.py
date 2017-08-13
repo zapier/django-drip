@@ -1,12 +1,13 @@
-import operator
 import functools
+import logging
+import operator
 
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.template import Context, Template
-from django.utils.importlib import import_module
-from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+from django.utils.importlib import import_module
 
 from drip.models import SentDrip
 from drip.utils import get_user_model
@@ -16,9 +17,6 @@ try:
 except ImportError:
     from datetime import datetime
     conditional_now = datetime.now
-
-
-import logging
 
 
 def configured_message_classes():
@@ -124,11 +122,6 @@ class DripBase(object):
 
         self.now_shift_kwargs = kwargs.get('now_shift_kwargs', {})
 
-
-    #########################
-    ### DATE MANIPULATION ###
-    #########################
-
     def now(self):
         """
         This allows us to override what we consider "now", making it easy
@@ -147,13 +140,13 @@ class DripBase(object):
         """
         Walk over a date range and create new instances of self with new ranges.
         """
-        walked_range = []
-        for shift in range(-into_past, into_future):
-            kwargs = dict(drip_model=self.drip_model,
-                          name=self.name,
-                          now_shift_kwargs={'days': shift})
-            walked_range.append(self.__class__(**kwargs))
-        return walked_range
+        return [
+            self.__class__(
+                drip_model=self.drip_model,
+                name=self.name,
+                now_shift_kwargs={'days': shift},
+            ) for shift in range(-into_past, into_future)
+        ]
 
     def apply_queryset_rules(self, qs):
         """
@@ -178,10 +171,6 @@ class DripBase(object):
         qs = qs.filter(*clauses['filter'])
 
         return qs
-
-    ##################
-    ### MANAGEMENT ###
-    ##################
 
     def get_queryset(self):
         try:
@@ -239,18 +228,13 @@ class DripBase(object):
                         from_email=self.from_email,
                         from_email_name=self.from_email_name,
                         subject=message_instance.subject,
-                        body=message_instance.body
+                        body=message_instance.body,
                     )
                     count += 1
             except Exception as e:
                 logging.error("Failed to send drip %s to user %s: %s" % (self.drip_model.id, user, e))
 
         return count
-
-
-    ####################
-    ### USER DEFINED ###
-    ####################
 
     def queryset(self):
         """

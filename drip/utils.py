@@ -1,7 +1,7 @@
 import sys
 
 from django.db import models
-from django.db.models import ForeignKey, OneToOneField, ManyToManyField
+from django.db.models import ForeignKey, ManyToManyField, OneToOneField
 from django.db.models.related import RelatedObject
 
 # taking a nod from python-requests and skipping six
@@ -17,7 +17,7 @@ elif is_py3:
     unicode = str
 
 
-def get_fields(Model, 
+def get_fields(Model,
                parent_field="",
                model_stack=None,
                stack_limit=2,
@@ -61,7 +61,7 @@ def get_fields(Model,
             stop_recursion = True
 
     if stop_recursion:
-        return [] # give empty list for "extend"
+        return []  # give empty list for "extend"
 
     for field in fields:
         field_name = field.name
@@ -80,19 +80,19 @@ def get_fields(Model,
         # add to the list
         out_fields.append([full_field, field_name, Model, field.__class__])
 
-        if not stop_recursion and \
-                (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or \
-                isinstance(field, RelatedObject) or isinstance(field, ManyToManyField)):
+        if (not stop_recursion and
+            (isinstance(field, ForeignKey) or isinstance(field, OneToOneField) or
+                isinstance(field, RelatedObject) or isinstance(field, ManyToManyField))):
 
             if isinstance(field, RelatedObject):
                 RelModel = field.model
-                #field_names.extend(get_fields(RelModel, full_field, True))
             else:
                 RelModel = field.related.parent_model
 
             out_fields.extend(get_fields(RelModel, full_field, list(model_stack)))
 
     return out_fields
+
 
 def give_model_field(full_field, Model):
     """
@@ -110,8 +110,10 @@ def give_model_field(full_field, Model):
 
     raise Exception('Field key `{0}` not found on `{1}`.'.format(full_field, Model.__name__))
 
+
 def get_simple_fields(Model, **kwargs):
     return [[f[0], f[3].__name__] for f in get_fields(Model, **kwargs)]
+
 
 def get_user_model():
     # handle 1.7 and back

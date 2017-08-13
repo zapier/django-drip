@@ -1,15 +1,15 @@
 from datetime import timedelta
 
-from django.test import TestCase
-from django.test.client import RequestFactory
+from django.conf import settings
+from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import resolve, reverse
-from django.core import mail
-from django.conf import settings
+from django.test import TestCase
+from django.test.client import RequestFactory
 from django.utils import timezone
 
-from drip.models import Drip, SentDrip, QuerySetRule
 from drip.drips import DripBase, DripMessage
+from drip.models import Drip, QuerySetRule, SentDrip
 from drip.utils import get_user_model, unicode
 
 from .models import Profile
@@ -20,7 +20,7 @@ class RulesTestCase(TestCase):
         self.drip = Drip.objects.create(
             name='A Drip just for Rules',
             subject_template='Hello',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
 
     def test_valid_rule(self):
@@ -46,7 +46,10 @@ class DripsTestCase(TestCase):
         self.User = get_user_model()
 
         start = timezone.now() - timedelta(hours=2)
-        num_string = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth']
+        num_string = [
+            'first', 'second', 'third', 'fourth', 'fifth',
+            'sixth', 'seventh', 'eighth', 'ninth', 'tenth',
+        ]
 
         for i, name in enumerate(num_string):
             user = self.User.objects.create(username='%s_25_credits_a_day' % name, email='%s@test.com' % name)
@@ -71,52 +74,38 @@ class DripsTestCase(TestCase):
     def test_day_two_users_active(self):
         start = timezone.now() - timedelta(days=3)
         end = timezone.now() - timedelta(days=2)
-        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
-                                                profile__credits__gt=0).count())
+        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end), profile__credits__gt=0).count())
 
     def test_day_two_users_inactive(self):
         start = timezone.now() - timedelta(days=3)
         end = timezone.now() - timedelta(days=2)
-        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
-                                                profile__credits=0).count())
+        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end), profile__credits=0).count())
 
     def test_day_seven_users_active(self):
         start = timezone.now() - timedelta(days=8)
         end = timezone.now() - timedelta(days=7)
-        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
-                                                profile__credits__gt=0).count())
+        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end), profile__credits__gt=0).count())
 
     def test_day_seven_users_inactive(self):
         start = timezone.now() - timedelta(days=8)
         end = timezone.now() - timedelta(days=7)
-        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end),
-                                                profile__credits=0).count())
+        self.assertEqual(1, self.User.objects.filter(date_joined__range=(start, end), profile__credits=0).count())
 
     def test_day_fourteen_users_active(self):
         start = timezone.now() - timedelta(days=15)
         end = timezone.now() - timedelta(days=14)
-        self.assertEqual(0, self.User.objects.filter(date_joined__range=(start, end),
-                                                profile__credits__gt=0).count())
+        self.assertEqual(0, self.User.objects.filter(date_joined__range=(start, end), profile__credits__gt=0).count())
 
     def test_day_fourteen_users_inactive(self):
         start = timezone.now() - timedelta(days=15)
         end = timezone.now() - timedelta(days=14)
-        self.assertEqual(0, self.User.objects.filter(date_joined__range=(start, end),
-                                                profile__credits=0).count())
-
-    ########################
-    ### RELATION SNAGGER ###
-    ########################
+        self.assertEqual(0, self.User.objects.filter(date_joined__range=(start, end), profile__credits=0).count())
 
     def test_get_simple_fields(self):
         from drip.utils import get_simple_fields
 
         simple_fields = get_simple_fields(self.User)
         self.assertTrue(bool([sf for sf in simple_fields if 'profile' in sf[0]]))
-
-    ##################
-    ### TEST DRIPS ###
-    ##################
 
     def test_backwards_drip_class(self):
         for drip in Drip.objects.all():
@@ -126,19 +115,19 @@ class DripsTestCase(TestCase):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
             lookup_type='lt',
-            field_value='now-{0} days'.format(shift_one)
+            field_value='now-{0} days'.format(shift_one),
         )
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value='now-{0} days'.format(shift_two)
+            field_value='now-{0} days'.format(shift_two),
         )
         return model_drip
 
@@ -150,14 +139,14 @@ class DripsTestCase(TestCase):
         drip = model_drip.drip
 
         # ensure we are starting from a blank slate
-        self.assertEqual(2, drip.get_queryset().count()) # 2 people meet the criteria
+        self.assertEqual(2, drip.get_queryset().count())  # 2 people meet the criteria
         drip.prune()
-        self.assertEqual(2, drip.get_queryset().count()) # no one is pruned, never sent before
-        self.assertEqual(0, SentDrip.objects.count()) # confirm nothing sent before
+        self.assertEqual(2, drip.get_queryset().count())  # no one is pruned, never sent before
+        self.assertEqual(0, SentDrip.objects.count())  # confirm nothing sent before
 
         # send the drip
         drip.send()
-        self.assertEqual(2, SentDrip.objects.count()) # got sent
+        self.assertEqual(2, SentDrip.objects.count())  # got sent
 
         for sent in SentDrip.objects.all():
             self.assertIn('HELLO', sent.subject)
@@ -165,17 +154,16 @@ class DripsTestCase(TestCase):
 
         # subsequent runs reflect previous activity
         drip = Drip.objects.get(id=model_drip.id).drip
-        self.assertEqual(2, drip.get_queryset().count()) # 2 people meet the criteria
+        self.assertEqual(2, drip.get_queryset().count())  # 2 people meet the criteria
         drip.prune()
-        self.assertEqual(0, drip.get_queryset().count()) # everyone is pruned
+        self.assertEqual(0, drip.get_queryset().count())  # everyone is pruned
 
     def test_custom_short_term_drip(self):
         model_drip = self.build_joined_date_drip(shift_one=3, shift_two=4)
         drip = model_drip.drip
 
         # ensure we are starting from a blank slate
-        self.assertEqual(2, drip.get_queryset().count()) # 2 people meet the criteria
-
+        self.assertEqual(2, drip.get_queryset().count())  # 2 people meet the criteria
 
     def test_custom_date_range_walk(self):
         model_drip = self.build_joined_date_drip()
@@ -199,11 +187,11 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='profile__credits',
             lookup_type='gte',
-            field_value='5'
+            field_value='5',
         )
         drip = model_drip.drip
 
-        self.assertEqual(1, drip.get_queryset().count()) # 1 person meet the criteria
+        self.assertEqual(1, drip.get_queryset().count())  # 1 person meet the criteria
 
         for count, shifted_drip in zip([0, 1, 1, 1, 1], drip.walk(into_past=3, into_future=2)):
             self.assertEqual(count, shifted_drip.get_queryset().count())
@@ -212,30 +200,30 @@ class DripsTestCase(TestCase):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
 
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__credits',
             lookup_type='gte',
-            field_value='1'
+            field_value='1',
         )
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__credits',
             method_type='exclude',
             lookup_type='exact',
-            field_value=100
+            field_value=100,
         )
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__credits',
             method_type='exclude',
             lookup_type='exact',
-            field_value=125
+            field_value=125,
         )
-        self.assertEqual(7, model_drip.drip.get_queryset().count()) # 7 people meet the criteria
+        self.assertEqual(7, model_drip.drip.get_queryset().count())  # 7 people meet the criteria
 
     def test_custom_drip_static_datetime(self):
         model_drip = self.build_joined_date_drip()
@@ -243,7 +231,7 @@ class DripsTestCase(TestCase):
             drip=model_drip,
             field_name='date_joined',
             lookup_type='lte',
-            field_value=(timezone.now() - timedelta(days=8)).strftime('%Y-%m-%d %H:%M:%S')
+            field_value=(timezone.now() - timedelta(days=8)).strftime('%Y-%m-%d %H:%M:%S'),
         )
         drip = model_drip.drip
 
@@ -254,13 +242,13 @@ class DripsTestCase(TestCase):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00'),
         )
         drip = model_drip.drip
 
@@ -271,21 +259,21 @@ class DripsTestCase(TestCase):
     def test_admin_timeline_prunes_user_output(self):
         """multiple users in timeline is confusing."""
         admin = self.User.objects.create(username='admin', email='admin@example.com')
-        admin.is_staff=True
-        admin.is_superuser=True
+        admin.is_staff = True
+        admin.is_superuser = True
         admin.save()
 
         # create a drip campaign that will surely give us duplicates.
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00'),
         )
 
         # then get it's admin view.
@@ -305,23 +293,18 @@ class DripsTestCase(TestCase):
         # check that our admin (not excluded from test) is shown once.
         self.assertEqual(unicode(response.content).count(admin.email), 1)
 
-
-    ##################
-    ### TEST M2M   ###
-    ##################
-
     def test_annotated_field_name_property_no_count(self):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
 
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
             lookup_type='exact',
-            field_value=2
+            field_value=2,
         )
         self.assertEqual(qsr.annotated_field_name, 'date_joined')
 
@@ -330,14 +313,14 @@ class DripsTestCase(TestCase):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
 
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='userprofile__user__groups__count',
             lookup_type='exact',
-            field_value=2
+            field_value=2,
         )
 
         self.assertEqual(qsr.annotated_field_name, 'num_userprofile_user_groups')
@@ -347,14 +330,14 @@ class DripsTestCase(TestCase):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
 
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
             lookup_type='exact',
-            field_value=2
+            field_value=2,
         )
 
         qs = qsr.apply_any_annotation(None)
@@ -366,14 +349,14 @@ class DripsTestCase(TestCase):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
 
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__user__groups__count',
             lookup_type='exact',
-            field_value=2
+            field_value=2,
         )
 
         qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
@@ -385,23 +368,22 @@ class DripsTestCase(TestCase):
         model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='KETTEHS ROCK!'
+            body_html_template='KETTEHS ROCK!',
         )
 
         qsr = QuerySetRule.objects.create(
             drip=model_drip,
             field_name='profile__user__groups__count',
             lookup_type='exact',
-            field_value='0'
+            field_value='0',
         )
 
         QuerySetRule.objects.create(
             drip=model_drip,
             field_name='date_joined',
             lookup_type='gte',
-            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')
+            field_value=(timezone.now() - timedelta(days=1)).strftime('%Y-%m-%d 00:00:00'),
         )
-
 
         qsr.clean()
         qs = model_drip.drip.apply_queryset_rules(model_drip.drip.get_queryset())
@@ -428,7 +410,7 @@ class CustomMessagesTest(TestCase):
         self.model_drip = Drip.objects.create(
             name='A Custom Week Ago',
             subject_template='HELLO {{ user.username }}',
-            body_html_template='<h2>This</h2> is an <b>example</b> html <strong>body</strong>.'
+            body_html_template='<h2>This</h2> is an <b>example</b> html <strong>body</strong>.',
         )
         QuerySetRule.objects.create(
             drip=self.model_drip,

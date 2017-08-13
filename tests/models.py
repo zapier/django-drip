@@ -13,4 +13,6 @@ class Profile(models.Model):
 def user_post_save(sender, instance, created, raw, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+
+
 models.signals.post_save.connect(user_post_save, sender=User)
