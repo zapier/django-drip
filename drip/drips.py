@@ -138,7 +138,7 @@ class DripBase(object):
 
     def timedelta(self, *a, **kw):
         """
-        If needed, this allows us the ability to manipuate the slicing of time.
+        If needed, this allows us the ability to manipulate the slicing of time.
         """
         from datetime import timedelta
         return timedelta(*a, **kw)
