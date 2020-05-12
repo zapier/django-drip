@@ -6,7 +6,11 @@ class Profile(models.Model):
     """
     For testing, track the number of "credits".
     """
-    user = models.OneToOneField('auth.User', related_name='profile')
+    user = models.OneToOneField(
+        'auth.User',
+        related_name='profile',
+        on_delete=models.CASCADE,
+    )
     credits = models.PositiveIntegerField(default=0)
 
 
