@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import resolve, reverse
+from django.urls import resolve, reverse
 from django.core import mail
 from django.conf import settings
 from django.utils import timezone

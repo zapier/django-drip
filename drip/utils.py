@@ -2,7 +2,7 @@ import sys
 
 from django.db import models
 from django.db.models import ForeignKey, OneToOneField, ManyToManyField
-from django.db.models.related import RelatedObject
+from django.db.models.fields.related import ForeignObjectRel as RelatedObject
 
 # taking a nod from python-requests and skipping six
 _ver = sys.version_info
