@@ -5,7 +5,7 @@ Django Drip
 
 Drip campaigns are pre-written sets of emails sent to customers or prospects over time. Django Drips lets you use the admin to manage drip campaign emails using querysets on Django's User model.
 
-We wrote this specifically to scratch an itch at our startup [Zapier](https://zapier.com/z/qO/). It currently runs all of our drip campaigns.
+This project is a fork of the one written by [Zapier](https://zapier.com/z/qO/) and it's intended to run with Django 3.0. It currently runs all of our drip campaigns.
 
 [Read the docs](https://django-drip.readthedocs.org/en/latest/) or [check out a demo](http://djangodrip.com/).
 
