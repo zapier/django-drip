@@ -184,12 +184,10 @@ class DripBase(object):
     ##################
 
     def get_queryset(self):
-        try:
-            return self._queryset
-        except AttributeError:
-            self._queryset = self.apply_queryset_rules(self.queryset())\
-                                 .distinct()
-            return self._queryset
+        queryset = getattr(self,'_queryset', None)
+        if queryset is None:
+            self._queryset = self.apply_queryset_rules(self.queryset()).distinct()
+        return self._queryset
 
     def run(self):
         """
