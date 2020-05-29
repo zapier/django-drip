@@ -2,7 +2,7 @@ import sys
 
 from django.db import models
 from django.db.models import ForeignKey, OneToOneField, ManyToManyField
-from django.db.models.related import RelatedObject
+from django.db.models.fields.related import ForeignObjectRel as RelatedObject
 
 # taking a nod from python-requests and skipping six
 _ver = sys.version_info
@@ -19,7 +19,7 @@ elif is_py3:
 
 def get_fields(Model, 
                parent_field="",
-               model_stack=None,
+               model_stack=[],
                stack_limit=2,
                excludes=['permissions', 'comment', 'content_type']):
     """
@@ -33,15 +33,12 @@ def get_fields(Model,
      """
     out_fields = []
 
-    if model_stack is None:
-        model_stack = []
-
     # github.com/omab/python-social-auth/commit/d8637cec02422374e4102231488481170dc51057
     if isinstance(Model, basestring):
         app_label, model_name = Model.split('.')
         Model = models.get_model(app_label, model_name)
 
-    fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_all_related_objects()
+    fields = Model._meta.fields + Model._meta.many_to_many + Model._meta.get_fields()
     model_stack.append(Model)
 
     # do a variety of checks to ensure recursion isnt being redundant
@@ -88,7 +85,7 @@ def get_fields(Model,
                 RelModel = field.model
                 #field_names.extend(get_fields(RelModel, full_field, True))
             else:
-                RelModel = field.related.parent_model
+                RelModel = field.related_model
 
             out_fields.extend(get_fields(RelModel, full_field, list(model_stack)))
 

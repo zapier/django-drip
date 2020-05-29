@@ -8,8 +8,7 @@ from drip.utils import get_user_model
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
-import timedelta as djangotimedelta
-
+from drip.helpers import parse
 
 class Drip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
@@ -54,8 +53,16 @@ class SentDrip(models.Model):
     """
     date = models.DateTimeField(auto_now_add=True)
 
-    drip = models.ForeignKey('drip.Drip', related_name='sent_drips')
-    user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name='sent_drips')
+    drip = models.ForeignKey(
+        'drip.Drip',
+        related_name='sent_drips',
+        on_delete=models.CASCADE,
+    )
+    user = models.ForeignKey(
+        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
+        related_name='sent_drips',
+        on_delete=models.CASCADE,
+    )
 
     subject = models.TextField()
     body = models.TextField()
@@ -94,7 +101,11 @@ class QuerySetRule(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     lastchanged = models.DateTimeField(auto_now=True)
 
-    drip = models.ForeignKey(Drip, related_name='queryset_rules')
+    drip = models.ForeignKey(
+        Drip,
+        related_name='queryset_rules',
+        on_delete=models.CASCADE,
+    )
 
     method_type = models.CharField(max_length=12, default='filter', choices=METHOD_TYPES)
     field_name = models.CharField(max_length=128, verbose_name='Field name of User')
@@ -137,16 +148,16 @@ class QuerySetRule(models.Model):
         # set time deltas and dates
         if self.field_value.startswith('now-'):
             field_value = self.field_value.replace('now-', '')
-            field_value = now() - djangotimedelta.parse(field_value)
+            field_value = now() - parse(field_value)
         elif self.field_value.startswith('now+'):
             field_value = self.field_value.replace('now+', '')
-            field_value = now() + djangotimedelta.parse(field_value)
+            field_value = now() + parse(field_value)
         elif self.field_value.startswith('today-'):
             field_value = self.field_value.replace('today-', '')
-            field_value = now().date() - djangotimedelta.parse(field_value)
+            field_value = now().date() - parse(field_value)
         elif self.field_value.startswith('today+'):
             field_value = self.field_value.replace('today+', '')
-            field_value = now().date() + djangotimedelta.parse(field_value)
+            field_value = now().date() + parse(field_value)
 
         # F expressions
         if self.field_value.startswith('F_'):
