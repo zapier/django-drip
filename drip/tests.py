@@ -377,8 +377,7 @@ class DripsTestCase(TestCase):
         )
 
         qs = qsr.apply_any_annotation(model_drip.drip.get_queryset())
-
-        self.assertEqual(list(qs.query.aggregate_select.keys()), ['num_profile_user_groups'])
+        self.assertEqual(list(qs.query.annotation_select.keys()), ['num_profile_user_groups'])
 
     def test_apply_multiple_rules_with_aggregation(self):
 

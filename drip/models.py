@@ -8,8 +8,7 @@ from drip.utils import get_user_model
 
 # just using this to parse, but totally insane package naming...
 # https://bitbucket.org/schinckel/django-timedelta-field/
-import timedelta as djangotimedelta
-
+from drip.helpers import parse
 
 class Drip(models.Model):
     date = models.DateTimeField(auto_now_add=True)
@@ -149,16 +148,16 @@ class QuerySetRule(models.Model):
         # set time deltas and dates
         if self.field_value.startswith('now-'):
             field_value = self.field_value.replace('now-', '')
-            field_value = now() - djangotimedelta.parse(field_value)
+            field_value = now() - parse(field_value)
         elif self.field_value.startswith('now+'):
             field_value = self.field_value.replace('now+', '')
-            field_value = now() + djangotimedelta.parse(field_value)
+            field_value = now() + parse(field_value)
         elif self.field_value.startswith('today-'):
             field_value = self.field_value.replace('today-', '')
-            field_value = now().date() - djangotimedelta.parse(field_value)
+            field_value = now().date() - parse(field_value)
         elif self.field_value.startswith('today+'):
             field_value = self.field_value.replace('today+', '')
-            field_value = now().date() + djangotimedelta.parse(field_value)
+            field_value = now().date() + parse(field_value)
 
         # F expressions
         if self.field_value.startswith('F_'):
