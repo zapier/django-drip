@@ -4,7 +4,7 @@ import functools
 from django.conf import settings
 from django.db.models import Q
 from django.template import Context, Template
-from django.utils.importlib import import_module
+from importlib import import_module
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 
@@ -184,12 +184,10 @@ class DripBase(object):
     ##################
 
     def get_queryset(self):
-        try:
-            return self._queryset
-        except AttributeError:
-            self._queryset = self.apply_queryset_rules(self.queryset())\
-                                 .distinct()
-            return self._queryset
+        queryset = getattr(self,'_queryset', None)
+        if queryset is None:
+            self._queryset = self.apply_queryset_rules(self.queryset()).distinct()
+        return self._queryset
 
     def run(self):
         """
