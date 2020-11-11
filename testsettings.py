@@ -6,7 +6,7 @@ DEBUG = True
 
 SECRET_KEY = 'whatever/you/want-goes-here'
 
-SECRET_KEY="whatever"
+SECRET_KEY = "whatever"
 
 DATABASES = {
     'default': {

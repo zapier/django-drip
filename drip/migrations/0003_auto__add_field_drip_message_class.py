@@ -10,7 +10,10 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Drip.message_class'
         db.add_column('drip_drip', 'message_class',
-                      self.gf('django.db.models.fields.CharField')(default='default', max_length=120, blank=True),
+                      self.gf('django.db.models.fields.CharField')(
+                          default='default',
+                          max_length=120,
+                          blank=True),
                       keep_default=False)
 
     def backwards(self, orm):

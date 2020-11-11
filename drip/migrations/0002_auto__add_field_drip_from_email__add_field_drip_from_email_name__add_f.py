@@ -10,24 +10,35 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Drip.from_email'
         db.add_column('drip_drip', 'from_email',
-                      self.gf('django.db.models.fields.EmailField')(max_length=75, null=True, blank=True),
+                      self.gf('django.db.models.fields.EmailField')(
+                          max_length=75,
+                          null=True,
+                          blank=True),
                       keep_default=False)
 
         # Adding field 'Drip.from_email_name'
         db.add_column('drip_drip', 'from_email_name',
-                      self.gf('django.db.models.fields.CharField')(max_length=150, null=True, blank=True),
+                      self.gf('django.db.models.fields.CharField')(
+                          max_length=150,
+                          null=True,
+                          blank=True),
                       keep_default=False)
 
         # Adding field 'SentDrip.from_email'
         db.add_column('drip_sentdrip', 'from_email',
-                      self.gf('django.db.models.fields.EmailField')(default=None, max_length=75, null=True),
+                      self.gf('django.db.models.fields.EmailField')(
+                          default=None,
+                          max_length=75,
+                          null=True),
                       keep_default=False)
 
         # Adding field 'SentDrip.from_email_name'
         db.add_column('drip_sentdrip', 'from_email_name',
-                      self.gf('django.db.models.fields.CharField')(default=None, max_length=150, null=True),
+                      self.gf('django.db.models.fields.CharField')(
+                          default=None,
+                          max_length=150,
+                          null=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting field 'Drip.from_email'
@@ -41,7 +52,6 @@ class Migration(SchemaMigration):
 
         # Deleting field 'SentDrip.from_email_name'
         db.delete_column('drip_sentdrip', 'from_email_name')
-
 
     models = {
         'auth.group': {

@@ -10,22 +10,33 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'Drip'
         db.create_table('drip_drip', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('lastchanged', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
-            ('enabled', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('subject_template', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('body_html_template', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('id', self.gf('django.db.models.fields.AutoField')
+             (primary_key=True)),
+            ('date', self.gf('django.db.models.fields.DateTimeField')
+             (auto_now_add=True, blank=True)),
+            ('lastchanged', self.gf('django.db.models.fields.DateTimeField')
+             (auto_now=True, blank=True)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=255)),
+            ('enabled',
+             self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('subject_template', self.gf('django.db.models.fields.TextField')
+             (null=True, blank=True)),
+            ('body_html_template', self.gf(
+                'django.db.models.fields.TextField')(null=True, blank=True)),
         ))
         db.send_create_signal('drip', ['Drip'])
 
         # Adding model 'SentDrip'
         db.create_table('drip_sentdrip', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('drip', self.gf('django.db.models.fields.related.ForeignKey')(related_name='sent_drips', to=orm['drip.Drip'])),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='sent_drips', to=orm['auth.User'])),
+            ('id', self.gf('django.db.models.fields.AutoField')
+             (primary_key=True)),
+            ('date', self.gf('django.db.models.fields.DateTimeField')
+             (auto_now_add=True, blank=True)),
+            ('drip', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='sent_drips', to=orm['drip.Drip'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='sent_drips', to=orm['auth.User'])),
             ('subject', self.gf('django.db.models.fields.TextField')()),
             ('body', self.gf('django.db.models.fields.TextField')()),
         ))
@@ -33,17 +44,24 @@ class Migration(SchemaMigration):
 
         # Adding model 'QuerySetRule'
         db.create_table('drip_querysetrule', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('lastchanged', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('drip', self.gf('django.db.models.fields.related.ForeignKey')(related_name='queryset_rules', to=orm['drip.Drip'])),
-            ('method_type', self.gf('django.db.models.fields.CharField')(default='filter', max_length=12)),
-            ('field_name', self.gf('django.db.models.fields.CharField')(max_length=128)),
-            ('lookup_type', self.gf('django.db.models.fields.CharField')(default='exact', max_length=12)),
-            ('field_value', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('id', self.gf('django.db.models.fields.AutoField')
+             (primary_key=True)),
+            ('date', self.gf('django.db.models.fields.DateTimeField')
+             (auto_now_add=True, blank=True)),
+            ('lastchanged', self.gf('django.db.models.fields.DateTimeField')
+             (auto_now=True, blank=True)),
+            ('drip', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='queryset_rules', to=orm['drip.Drip'])),
+            ('method_type', self.gf('django.db.models.fields.CharField')
+             (default='filter', max_length=12)),
+            ('field_name',
+             self.gf('django.db.models.fields.CharField')(max_length=128)),
+            ('lookup_type', self.gf('django.db.models.fields.CharField')
+             (default='exact', max_length=12)),
+            ('field_value',
+             self.gf('django.db.models.fields.CharField')(max_length=255)),
         ))
         db.send_create_signal('drip', ['QuerySetRule'])
-
 
     def backwards(self, orm):
         # Deleting model 'Drip'
@@ -54,7 +72,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'QuerySetRule'
         db.delete_table('drip_querysetrule')
-
 
     models = {
         'auth.group': {
