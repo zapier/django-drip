@@ -78,29 +78,29 @@ class DripAdmin(admin.ModelAdmin):
         extra_context['field_data'] = json.dumps(get_simple_fields(User))
         return extra_context
 
-    def add_view(self, request, extra_context=None):
+    def add_view(self, request, form_url='', extra_context=None):
         return super(DripAdmin, self).add_view(
-            request, extra_context=self.build_extra_context(extra_context))
+            request, form_url=form_url, extra_context=self.build_extra_context(extra_context))
 
-    def change_view(self, request, object_id, extra_context=None):
+    def change_view(self, request, object_id, form_url='', extra_context=None):
         return super(DripAdmin, self).change_view(
-            request, object_id, extra_context=self.build_extra_context(extra_context))
+            request, object_id, form_url=form_url, extra_context=self.build_extra_context(extra_context))
 
     def get_urls(self):
-        from django.conf.urls import patterns, url
+        from django.urls import re_path
         urls = super(DripAdmin, self).get_urls()
-        my_urls = patterns('',
-            url(
+        my_urls = [
+            re_path(
                 r'^(?P<drip_id>[\d]+)/timeline/(?P<into_past>[\d]+)/(?P<into_future>[\d]+)/$',
                 self.av(self.timeline),
                 name='drip_timeline'
             ),
-            url(
+            re_path(
                 r'^(?P<drip_id>[\d]+)/timeline/(?P<into_past>[\d]+)/(?P<into_future>[\d]+)/(?P<user_id>[\d]+)/$',
                 self.av(self.view_drip_email),
                 name='view_drip_email'
             )
-        )
+        ]
         return my_urls + urls
 admin.site.register(Drip, DripAdmin)
 
