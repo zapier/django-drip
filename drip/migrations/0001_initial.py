@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ('field_name', models.CharField(max_length=128, verbose_name=b'Field name of User')),
                 ('lookup_type', models.CharField(default=b'exact', max_length=12, choices=[(b'exact', b'exactly'), (b'iexact', b'exactly (case insensitive)'), (b'contains', b'contains'), (b'icontains', b'contains (case insensitive)'), (b'regex', b'regex'), (b'iregex', b'contains (case insensitive)'), (b'gt', b'greater than'), (b'gte', b'greater than or equal to'), (b'lt', b'less than'), (b'lte', b'less than or equal to'), (b'startswith', b'starts with'), (b'endswith', b'starts with'), (b'istartswith', b'ends with (case insensitive)'), (b'iendswith', b'ends with (case insensitive)')])),
                 ('field_value', models.CharField(help_text=b'Can be anything from a number, to a string. Or, do `now-7 days` or `today+3 days` for fancy timedelta.', max_length=255)),
-                ('drip', models.ForeignKey(related_name='queryset_rules', to='drip.Drip')),
+                ('drip', models.ForeignKey(related_name='queryset_rules', to='drip.Drip', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -49,8 +49,8 @@ class Migration(migrations.Migration):
                 ('body', models.TextField()),
                 ('from_email', models.EmailField(default=None, max_length=254, null=True)),
                 ('from_email_name', models.CharField(default=None, max_length=150, null=True)),
-                ('drip', models.ForeignKey(related_name='sent_drips', to='drip.Drip')),
-                ('user', models.ForeignKey(related_name='sent_drips', to=settings.AUTH_USER_MODEL)),
+                ('drip', models.ForeignKey(related_name='sent_drips', to='drip.Drip', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(related_name='sent_drips', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
     ]

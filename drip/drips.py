@@ -12,7 +12,8 @@ from drip.models import SentDrip
 from drip.utils import get_user_model
 
 try:
-    from django.utils.timezone import now as conditional_now
+    from django.utils import timezone
+    conditional_now = lambda: timezone.now().astimezone(timezone.get_default_timezone())
 except ImportError:
     from datetime import datetime
     conditional_now = datetime.now
